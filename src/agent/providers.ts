@@ -10,6 +10,34 @@ export interface LLMProvider {
 }
 
 /**
+ * Tries `primary`; on failure (e.g. Ollama not running), falls back to `fallback`
+ * (e.g. Anthropic if a key is configured). Determinism note: the fallback only
+ * fires on error, so the normal path stays predictable.
+ */
+export class FallbackProvider implements LLMProvider {
+  readonly name: string;
+  readonly model: string;
+  constructor(
+    private primary: LLMProvider,
+    private fallback: LLMProvider,
+  ) {
+    this.name = `${primary.name}→${fallback.name}`;
+    this.model = primary.model;
+  }
+  async complete(system: string, user: string): Promise<string> {
+    try {
+      return await this.primary.complete(system, user);
+    } catch (error) {
+      logger.warn(
+        `${this.primary.name} failed; falling back to ${this.fallback.name}`,
+        error,
+      );
+      return this.fallback.complete(system, user);
+    }
+  }
+}
+
+/**
  * Local Ollama provider — the default. Free, on-device, no API key.
  * Talks to the local Ollama daemon (`ollama serve`).
  */

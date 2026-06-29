@@ -2,33 +2,39 @@ import { createLogger } from "../logger.js";
 
 const logger = createLogger("EmbeddingGenerator");
 
-/**
- * Generates vector embeddings for code chunks
- * Uses Xenova transformers for local, fast embedding generation
- */
-export class EmbeddingGenerator {
-  private model: any;
+/** Anything that turns text into a vector. Lets the embedding model be swapped. */
+export interface Embedder {
+  initialize(): Promise<void>;
+  generateEmbedding(text: string): Promise<number[]>;
+}
 
-  /**
-   * Initialize the embedding model (downloads on first run)
-   * This happens once and caches locally
-   */
+const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
+
+/**
+ * Local, in-process embeddings via transformers.js — no server, no API key, so
+ * indexing + search work fully offline (and inside a container). The model is
+ * swappable with DEVTOOL_EMBED_MODEL (any transformers.js feature-extraction
+ * model); the default is the 384-dim all-MiniLM-L6-v2.
+ */
+export class EmbeddingGenerator implements Embedder {
+  private model: any;
+  readonly modelName: string;
+
+  constructor(
+    modelName: string = process.env.DEVTOOL_EMBED_MODEL ?? DEFAULT_MODEL,
+  ) {
+    this.modelName = modelName;
+  }
+
   async initialize(): Promise<void> {
     try {
-      logger.info("Initializing embedding model...");
-
+      logger.info(`Initializing embedding model (${this.modelName})...`);
       // Dynamically import to avoid WASM issues
       const { pipeline } = await import("@xenova/transformers");
-
-      logger.info(
-        "Loading all-MiniLM-L6-v2 model (this may take a minute on first run)...",
-      );
-      this.model = await pipeline(
-        "feature-extraction",
-        "Xenova/all-MiniLM-L6-v2",
-        { quantized: true }, // Use quantized version for faster loading
-      );
-
+      logger.info("Loading model (first run downloads it once)...");
+      this.model = await pipeline("feature-extraction", this.modelName, {
+        quantized: true,
+      });
       logger.info("Embedding model initialized successfully");
     } catch (error) {
       logger.error("Failed to initialize embedding model", error);

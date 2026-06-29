@@ -1,13 +1,14 @@
 # devtool-rag
 
-**Ask questions about any codebase and get answers grounded in the actual code — running entirely on your machine.**
+**Ask questions about any codebase — or triage a ticket against it — and get answers grounded in the actual code, running entirely on your machine.**
 
-Index a repo → it parses and chunks the code, embeds it locally, and stores the vectors in an
-embedded database. Then `search` it semantically, or `analyze` a question and have a **local LLM**
-answer *grounded only in the retrieved code*, citing the files it used.
+Index a repo → it chunks the code (language-aware), embeds it locally, and stores the vectors in
+Node's built-in SQLite. Then **hybrid search** it (semantic + keyword), `analyze` a question, or
+`analyze-ticket` a Jira issue and have a **local LLM** answer *grounded only in the retrieved code*,
+citing the files it used.
 
-No SaaS embeddings. No Postgres. No Docker. **No API key** — `analyze` uses your local Ollama by
-default. One SQLite file under `./data`.
+No SaaS embeddings. No database server. No native compiler. **No API key** — `analyze` uses your
+local Ollama by default. One SQLite file under `./data`.
 
 ```
 $ devtool-rag analyze "how are passwords verified?"
@@ -17,45 +18,48 @@ stored salt via hashPassword() (SHA-256) and compares it to the stored hash…
 
 Sources:
   [0.81] src/auth.ts · verifyLogin
-  [0.52] src/auth.ts · hashPassword
+(via ollama: llama3.1)
 ```
 
 ## Why it's different
-- **Local-first:** embeddings run on-device (`all-MiniLM-L6-v2` via transformers.js). Your code never leaves the machine for indexing.
-- **Zero infrastructure:** vectors live in SQLite + [`sqlite-vec`](https://github.com/asg017/sqlite-vec). No database server, no containers.
-- **Multi-language:** indexes JS/TS, Python, Go, Java, Rust, and more.
-- **Portable:** `clone → install → run`. The only network call is the optional `analyze` step (Claude).
+- **Local-first:** embeddings run on-device (transformers.js); the LLM step defaults to local Ollama. Your code never leaves the machine.
+- **Hybrid retrieval:** dense vectors (`sqlite-vec`) **+** BM25 keyword (SQLite FTS5) fused with Reciprocal Rank Fusion — so exact identifiers *and* fuzzy intent both rank well.
+- **Zero infrastructure, zero compiler:** vectors + text + full-text index all live in Node 24's built-in `node:sqlite`. No Postgres, no Docker required to run, no `node-gyp`/C++ build.
+- **Ticket-aware:** `analyze-ticket` pulls a Jira issue and triages it against the indexed repo (approach, likely-affected files, risks).
+- **No lock-in:** embedding model and LLM are both swappable; Anthropic is an optional fallback.
 
 ## Stack
-- Node ≥ 20, TypeScript
-- `better-sqlite3` + `sqlite-vec` — embedded vector store
-- `@xenova/transformers` — local 384-dim embeddings
-- local **Ollama** — the default `analyze` LLM (free, on-device); `@anthropic-ai/sdk` optional
-- `commander` (CLI), `simple-git` (optional repo cloning), `vitest` (tests)
+- **Node ≥ 24**, TypeScript (run with `--experimental-sqlite`)
+- `node:sqlite` + [`sqlite-vec`](https://github.com/asg017/sqlite-vec) + FTS5 — embedded hybrid store, no native compile
+- `@xenova/transformers` — local 384-dim embeddings (swap via `DEVTOOL_EMBED_MODEL`)
+- local **Ollama** — default `analyze` LLM (free); `@anthropic-ai/sdk` optional fallback
+- `commander` (CLI), `simple-git` (optional cloning), `vitest` (tests)
 
 ## Quick start
 ```bash
-pnpm install                      # builds the native sqlite bits
+pnpm install
 pnpm build
 
-# index a local repo (or a git URL)
-node dist/cli.js index ./examples/sample-repo
-
-# semantic search — fully local
-node dist/cli.js search "retry a network request with backoff"
-
-# grounded Q&A — local by default (needs Ollama: `ollama serve` + `ollama pull llama3.1`)
-node dist/cli.js analyze "how is the shopping cart total calculated?"
-
+node dist/cli.js index ./examples/sample-repo                 # index a repo (or a git URL)
+node dist/cli.js search "retry a request with backoff"        # hybrid search — fully local
+node dist/cli.js analyze "how is the cart total calculated?"  # grounded Q&A (local Ollama)
+node dist/cli.js analyze-ticket --fixture ./tests/fixtures/jira-issue.json   # triage a ticket
 node dist/cli.js stats
 ```
+First `index` downloads the embedding model once, then runs offline. `analyze`/`analyze-ticket` need a
+local model: `ollama serve` + `ollama pull llama3.1` (or set `DEVTOOL_PROVIDER=anthropic` + a key).
 
-First `index` downloads the embedding model once (~a few seconds), then runs offline. `analyze` uses
-your local Ollama by default — no API key. To use Anthropic instead, see `.env.example`.
+## Run it three ways
+1. **Native** — `pnpm install && pnpm build` (Node 24). Nothing to compile.
+2. **Dev container / Codespaces** — open in VS Code → "Reopen in Container", or launch a Codespace. Zero local setup.
+3. **Docker / OrbStack / Colima** — `docker compose run --rm app index examples/sample-repo` (bundles an Ollama sidecar). *No Docker Desktop needed.*
+
+> "No Docker" above means Docker isn't **required as a runtime dependency** (unlike a Postgres-backed
+> design); a Dockerfile + devcontainer are provided purely for reproducible, zero-assumption runs.
 
 ## Use as a library
 ```ts
-import { VectorStore, EmbeddingGenerator, AnalysisAgent } from "devtool-rag";
+import { VectorStore, EmbeddingGenerator, AnalysisAgent, loadJiraFixture } from "devtool-rag";
 ```
 See `src/index.ts` for the full surface.
 
@@ -63,15 +67,16 @@ See `src/index.ts` for the full surface.
 ```bash
 pnpm check   # typecheck
 pnpm lint    # biome
-pnpm test    # vitest (real embeddings + sqlite-vec, no network)
+pnpm test    # vitest: hybrid retrieval, ticket triage (LLM mocked), recall@3 gold set — no network
 ```
 
 ## Roadmap
-- ✅ Local index → semantic search → grounded analysis, single SQLite file
-- ✅ Multi-language indexing, library API, integration tests
-- ◻ Incremental re-index (per-file update instead of full rebuild)
-- ◻ Pluggable LLM provider (via [moss](https://github.com/KarlDoyle/moss) router)
-- ◻ Optional richer parsing for symbol-level retrieval
+- ✅ Local index → **hybrid** search → grounded analysis, single `node:sqlite` file
+- ✅ Ticket triage (Jira ingest), swappable embeddings, Ollama→Anthropic fallback, devcontainer + Docker
+- ◻ Incremental re-index (per-file) · richer symbol-level parsing · cross-encoder rerank (only if precision needs it)
+- ◻ Route the LLM through [moss](https://github.com/KarlDoyle/moss) as a shared local-first model layer
+
+*Deliberately kept out (to stay lean): tree-sitter native grammars, agentic multi-step loops, heavy eval frameworks.*
 
 ## License
 MIT

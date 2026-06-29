@@ -1,4 +1,6 @@
 import type { EmbeddingGenerator } from "../indexer/embedding-generator.js";
+import type { RepoInfo } from "../ingest/github.js";
+import type { Ticket } from "../ingest/jira.js";
 import { createLogger } from "../logger.js";
 import type { CodeChunk, VectorStore } from "../vector-store/index.js";
 import type { LLMProvider } from "./providers.js";
@@ -33,9 +35,27 @@ export class AnalysisAgent {
   /** Retrieve relevant chunks for a query (no LLM call — useful + testable on its own). */
   async retrieve(query: string, topK = 8): Promise<CodeChunk[]> {
     const queryEmbedding = await this.embedder.generateEmbedding(query);
-    return this.store.search(queryEmbedding, topK);
+    return this.store.search(queryEmbedding, query, topK);
   }
 
+  private formatContext(chunks: CodeChunk[]): string {
+    return chunks
+      .map(
+        (c, i) =>
+          `### Source ${i + 1}: ${c.filePath}${c.metadata.entityName ? ` (${c.metadata.entityName})` : ""}\n\`\`\`\n${c.content}\n\`\`\``,
+      )
+      .join("\n\n");
+  }
+
+  private toSources(chunks: CodeChunk[]): AnalysisSource[] {
+    return chunks.map((c) => ({
+      filePath: c.filePath,
+      similarity: Number((c.similarity ?? 0).toFixed(3)),
+      entityName: c.metadata.entityName,
+    }));
+  }
+
+  /** Free-form Q&A grounded in retrieved code. */
   async analyze(query: string, topK = 8): Promise<AnalysisResult> {
     const chunks = await this.retrieve(query, topK);
     if (chunks.length === 0) {
@@ -45,37 +65,56 @@ export class AnalysisAgent {
         model: this.llm.model,
       };
     }
-
-    const context = chunks
-      .map(
-        (c, i) =>
-          `### Source ${i + 1}: ${c.filePath}${c.metadata.entityName ? ` (${c.metadata.entityName})` : ""}\n\`\`\`\n${c.content}\n\`\`\``,
-      )
-      .join("\n\n");
-
     const system =
       "You are a senior engineer answering questions about a codebase. " +
       "Answer ONLY using the provided code context. If the context is insufficient, say so plainly. " +
       "Cite the source file paths you relied on. Be concise and concrete.";
-
     logger.info(
       `Analyzing with ${chunks.length} sources via ${this.llm.name} (${this.llm.model})`,
     );
     const answer = (
       await this.llm.complete(
         system,
-        `Question: ${query}\n\nCode context:\n${context}`,
+        `Question: ${query}\n\nCode context:\n${this.formatContext(chunks)}`,
       )
     ).trim();
+    return { answer, sources: this.toSources(chunks), model: this.llm.model };
+  }
 
-    return {
-      answer,
-      sources: chunks.map((c) => ({
-        filePath: c.filePath,
-        similarity: Number((c.similarity ?? 0).toFixed(3)),
-        entityName: c.metadata.entityName,
-      })),
-      model: this.llm.model,
-    };
+  /**
+   * Triage a ticket against the indexed codebase: what it's asking, an approach,
+   * likely-affected files and risks — grounded in retrieved code.
+   */
+  async analyzeTicket(
+    ticket: Ticket,
+    repo?: RepoInfo,
+    topK = 8,
+  ): Promise<AnalysisResult> {
+    const query = `${ticket.summary}\n${ticket.description}`.trim();
+    const chunks = await this.retrieve(query, topK);
+    if (chunks.length === 0) {
+      return {
+        answer:
+          "No indexed code matched this ticket. Have you indexed the repo?",
+        sources: [],
+        model: this.llm.model,
+      };
+    }
+    const system =
+      "You are a senior engineer triaging a ticket against a codebase. Using ONLY the provided code " +
+      "context, give: (1) what the ticket is really asking, (2) a concrete implementation approach, " +
+      "(3) the files most likely to change, (4) risks/edge cases. Cite the files you used. If the " +
+      "context is insufficient to be specific, say so.";
+    const repoLine = repo
+      ? `Repository: ${repo.fullName} (${repo.language}, default branch ${repo.defaultBranch}).\n`
+      : "";
+    const user =
+      `${repoLine}Ticket ${ticket.key} [${ticket.type} · ${ticket.priority} · ${ticket.status}]: ${ticket.summary}\n\n` +
+      `${ticket.description}\n\nCode context:\n${this.formatContext(chunks)}`;
+    logger.info(
+      `Triaging ${ticket.key} with ${chunks.length} sources via ${this.llm.name}`,
+    );
+    const answer = (await this.llm.complete(system, user)).trim();
+    return { answer, sources: this.toSources(chunks), model: this.llm.model };
   }
 }
