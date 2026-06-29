@@ -10,6 +10,27 @@ export interface ChunkingStrategy {
 }
 
 /**
+ * A chunk plus its REAL position in the source file. `startLine`/`endLine` are
+ * 1-based and computed directly from the chunk's character offsets, so they are
+ * always substantiated by the file (never fabricated). These positions are what
+ * lets the indexer attribute a chunk to the entity that actually encloses it.
+ */
+export interface Chunk {
+  content: string;
+  startLine: number;
+  endLine: number;
+}
+
+/** 1-based line number of the character at `offset`. */
+function lineAtOffset(content: string, offset: number): number {
+  let line = 1;
+  for (let i = 0; i < offset && i < content.length; i++) {
+    if (content[i] === "\n") line++;
+  }
+  return line;
+}
+
+/**
  * Get chunking strategy for a specific language
  */
 export function getChunkingStrategy(language: string): ChunkingStrategy {
@@ -126,9 +147,9 @@ export function getChunkingStrategy(language: string): ChunkingStrategy {
  * Create smart chunks using language-specific strategies
  * Attempts to break at natural boundaries (functions, classes) rather than arbitrary character counts
  */
-export function createSmartChunks(content: string, language: string): string[] {
+export function createSmartChunks(content: string, language: string): Chunk[] {
   const strategy = getChunkingStrategy(language);
-  const chunks: string[] = [];
+  const chunks: Chunk[] = [];
 
   // Handle empty content
   if (!content || content.length === 0) {
@@ -137,7 +158,9 @@ export function createSmartChunks(content: string, language: string): string[] {
 
   // If content is smaller than maxSize, return it as a single chunk
   if (content.length <= strategy.maxSize) {
-    return [content];
+    return [
+      { content, startLine: 1, endLine: lineAtOffset(content, content.length) },
+    ];
   }
 
   let start = 0;
@@ -176,8 +199,14 @@ export function createSmartChunks(content: string, language: string): string[] {
     // Extract the chunk
     const chunk = content.substring(start, end);
     if (chunk.trim().length > 0) {
-      // Only add non-empty chunks
-      chunks.push(chunk);
+      // Only add non-empty chunks. Lines are derived from the real offsets:
+      // startLine is the line of the first character; endLine accounts for any
+      // newlines inside the chunk body.
+      chunks.push({
+        content: chunk,
+        startLine: lineAtOffset(content, start),
+        endLine: lineAtOffset(content, end - 1),
+      });
     }
 
     // Move to next chunk position with overlap
@@ -195,27 +224,4 @@ export function createSmartChunks(content: string, language: string): string[] {
   }
 
   return chunks;
-}
-
-/**
- * Calculate optimal chunk size based on content type and language
- */
-export function calculateOptimalChunkSize(
-  language: string,
-  hasEntities: boolean,
-  contentLength: number,
-): number {
-  const strategy = getChunkingStrategy(language);
-
-  // If content has parsed entities, we can use larger chunks since we have structure
-  if (hasEntities && contentLength > strategy.maxSize * 2) {
-    return Math.floor(strategy.maxSize * 1.3);
-  }
-
-  // For short files, use smaller chunks
-  if (contentLength < strategy.maxSize) {
-    return contentLength;
-  }
-
-  return strategy.maxSize;
 }

@@ -2,7 +2,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { createLogger } from "../logger.js";
 import type { CodeChunk, VectorStore } from "../vector-store/index.js";
-import { ASTParser } from "./ast-parser.js";
+import { ASTParser, type CodeEntity } from "./ast-parser.js";
 import { createSmartChunks } from "./chunking-strategies.js";
 import { EmbeddingGenerator } from "./embedding-generator.js";
 import {
@@ -16,6 +16,28 @@ const logger = createLogger("Indexer");
 export interface IndexResult {
   files: number;
   chunks: number;
+}
+
+/**
+ * Pick the entity that actually ENCLOSES a chunk: the smallest-span entity whose
+ * [startLine, endLine] contains the chunk's start line. Smallest span wins so a
+ * chunk inside a method maps to the method rather than the surrounding class.
+ * Returns `undefined` when no entity encloses the chunk — the caller must then
+ * omit the entity name and line numbers rather than cite something false.
+ */
+export function findEnclosingEntity(
+  entities: CodeEntity[],
+  chunkStartLine: number,
+): CodeEntity | undefined {
+  let best: CodeEntity | undefined;
+  for (const e of entities) {
+    if (e.startLine <= chunkStartLine && chunkStartLine <= e.endLine) {
+      if (!best || e.endLine - e.startLine < best.endLine - best.startLine) {
+        best = e;
+      }
+    }
+  }
+  return best;
 }
 
 /**
@@ -94,21 +116,27 @@ export class RepositoryIndexer {
     const chunks = createSmartChunks(content, language);
 
     const rows: Array<Omit<CodeChunk, "similarity">> = [];
-    for (const chunkContent of chunks) {
-      if (!chunkContent.trim()) continue;
-      const embedding = await this.embedder.generateEmbedding(chunkContent);
-      const entity = entities[0];
+    for (const chunk of chunks) {
+      if (!chunk.content.trim()) continue;
+      const embedding = await this.embedder.generateEmbedding(chunk.content);
+      // Attribute the chunk to the entity that genuinely encloses it, carrying
+      // that entity's REAL line span. When nothing encloses the chunk we leave
+      // entityName/startLine/endLine unset: an honest absence beats a fabricated
+      // citation.
+      const entity = findEnclosingEntity(entities, chunk.startLine);
       rows.push({
         filePath: relativePath,
         chunkType: entity?.type ?? "code",
-        content: chunkContent,
+        content: chunk.content,
         embedding,
-        metadata: {
-          entityName: entity?.name,
-          startLine: entity?.startLine,
-          endLine: entity?.endLine,
-          language,
-        },
+        metadata: entity
+          ? {
+              entityName: entity.name,
+              startLine: entity.startLine,
+              endLine: entity.endLine,
+              language,
+            }
+          : { language },
       });
     }
     this.store.insertMany(rows);
