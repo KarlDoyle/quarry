@@ -60,6 +60,17 @@ async function listScannableFiles(): Promise<string[]> {
   for (const root of SCAN_ROOTS) {
     await walk(join(REPO_ROOT, root));
   }
+  // Always scan root-level dotenv files — the highest-risk place a key leaks,
+  // and the one this scanner claims to cover (SCAN_ROOTS lists only sub-dirs).
+  try {
+    for (const name of await readdir(REPO_ROOT)) {
+      if (!/^\.env(\..+)?$/.test(name)) continue;
+      const full = join(REPO_ROOT, name);
+      if ((await stat(full)).isFile()) out.push(full);
+    }
+  } catch {
+    // no root listing — ignore
+  }
   return out;
 }
 
