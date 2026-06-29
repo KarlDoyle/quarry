@@ -12,7 +12,7 @@ permissions:
 # if the previous one passed. This is the same order the local pre-push hook
 # runs, so "green here" means "green there".
 #
-# devtool-rag uses node:sqlite, so its `check`/`test` pnpm scripts carry
+# Quarry uses node:sqlite, so its `check`/`test` pnpm scripts carry
 # `NODE_OPTIONS=--experimental-sqlite` internally — we invoke the named scripts
 # here so that flag stays put.
 jobs:

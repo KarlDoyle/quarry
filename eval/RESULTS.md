@@ -1,4 +1,4 @@
-# Retrieval quality — devtool-rag v0.2
+# Retrieval quality — Quarry v0.2
 
 Real measurement of hybrid (dense + BM25, fused with RRF) vs dense-only retrieval,
 produced by `scripts/eval.ts` (`pnpm eval`). No inflation: numbers are copied
@@ -8,7 +8,7 @@ verbatim from the harness output and are deterministic across runs.
 
 | | |
 |---|---|
-| Tool | `devtool-rag` v0.2 (`feat/v0.2`), hybrid retrieval: sqlite-vec KNN + FTS5 BM25, RRF (k=60) |
+| Tool | `quarry` v0.2 (`feat/v0.2`), hybrid retrieval: sqlite-vec KNN + FTS5 BM25, RRF (k=60) |
 | Corpus | `moss` — real, clean TypeScript CLI codebase |
 | Embedding model | `Xenova/all-MiniLM-L6-v2` (384-dim, quantized, local/offline) |
 | LLM | none — retrieval only; no Ollama, no API, no network |

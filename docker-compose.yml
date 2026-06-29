@@ -6,7 +6,7 @@ services:
     build: .
     environment:
       - OLLAMA_HOST=http://ollama:11434
-      - DEVTOOL_DATA_DIR=/data
+      - QUARRY_DATA_DIR=/data
     volumes:
       - data:/data
     depends_on:

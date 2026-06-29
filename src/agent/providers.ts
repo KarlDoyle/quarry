@@ -82,7 +82,7 @@ export class OllamaProvider implements LLMProvider {
 
 /**
  * Optional Anthropic provider. Only used when explicitly selected
- * (DEVTOOL_PROVIDER=anthropic) — it bills the pay-per-token API, separate from
+ * (QUARRY_PROVIDER=anthropic) — it bills the pay-per-token API, separate from
  * any Claude subscription, so it is never the default.
  */
 export class AnthropicProvider implements LLMProvider {

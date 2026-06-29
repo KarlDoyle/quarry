@@ -19,7 +19,7 @@ import { VectorStore } from "./vector-store/index.js";
 
 const program = new Command();
 program
-  .name("devtool-rag")
+  .name("quarry")
   .description(
     "Local-first hybrid code search + grounded LLM analysis + ticket triage. No SaaS, no DB server, no key.",
   )
@@ -105,7 +105,7 @@ function buildProvider(config: Config): LLMProvider {
   if (config.provider === "anthropic") {
     if (!config.anthropicApiKey) {
       console.error(
-        "DEVTOOL_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set.",
+        "QUARRY_PROVIDER=anthropic but ANTHROPIC_API_KEY is not set.",
       );
       process.exit(1);
     }

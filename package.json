@@ -1,10 +1,10 @@
 {
-  "name": "devtool-rag",
+  "name": "quarry",
   "version": "0.2.0",
   "description": "Local-first semantic + keyword code search and ticket triage. Index any repo, ask questions or triage a Jira ticket, get grounded answers — no SaaS, no database server, no API key.",
   "type": "module",
   "bin": {
-    "devtool-rag": "./dist/cli.js"
+    "quarry": "./dist/cli.js"
   },
   "engines": {
     "node": ">=24"

@@ -5,7 +5,7 @@ import * as path from "node:path";
  * no secrets stored anywhere. Keeps the tool portable and side-effect-free.
  *
  * The `analyze` LLM step defaults to LOCAL Ollama (free, on-device, no API key).
- * Set DEVTOOL_PROVIDER=anthropic to use the paid Anthropic API instead.
+ * Set QUARRY_PROVIDER=anthropic to use the paid Anthropic API instead.
  */
 export type ProviderName = "ollama" | "anthropic";
 
@@ -23,19 +23,19 @@ export interface Config {
 }
 
 export function loadConfig(): Config {
-  const dataDir = process.env.DEVTOOL_DATA_DIR
-    ? path.resolve(process.env.DEVTOOL_DATA_DIR)
+  const dataDir = process.env.QUARRY_DATA_DIR
+    ? path.resolve(process.env.QUARRY_DATA_DIR)
     : path.resolve(process.cwd(), "data");
 
   const provider: ProviderName =
-    process.env.DEVTOOL_PROVIDER === "anthropic" ? "anthropic" : "ollama";
+    process.env.QUARRY_PROVIDER === "anthropic" ? "anthropic" : "ollama";
   const defaultModel =
     provider === "anthropic" ? "claude-3-5-haiku-latest" : "llama3.1";
 
   return {
     dataDir,
     provider,
-    model: process.env.DEVTOOL_MODEL ?? defaultModel,
+    model: process.env.QUARRY_MODEL ?? defaultModel,
     ollamaHost: process.env.OLLAMA_HOST ?? "http://127.0.0.1:11434",
     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
   };

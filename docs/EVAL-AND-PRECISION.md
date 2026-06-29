@@ -1,6 +1,6 @@
 # Evaluation and precision — how we measure, and what we expect
 
-This is the durable reference for retrieval quality in devtool-rag ("Quarry"):
+This is the durable reference for retrieval quality in Quarry:
 the numbers we have actually measured, the levers that improve precision (ranked,
 with honest expected gains and sources), the tiered architecture that keeps the
 laptop lean, and how we test the heavier tiers for free. British English, plain,

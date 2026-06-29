@@ -1,5 +1,5 @@
 {
-  "name": "devtool-rag",
+  "name": "quarry",
   "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
   "postCreateCommand": "corepack enable && pnpm install",
   "customizations": {

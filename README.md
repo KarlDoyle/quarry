@@ -1,4 +1,4 @@
-# devtool-rag
+# Quarry
 
 **Ask questions about any codebase — or triage a ticket against it — and get answers grounded in the actual code, running entirely on your machine.**
 
@@ -11,7 +11,7 @@ No SaaS embeddings. No database server. No native compiler. **No API key** — `
 local Ollama by default. One SQLite file under `./data`.
 
 ```
-$ devtool-rag analyze "how are passwords verified?"
+$ quarry analyze "how are passwords verified?"
 
 Passwords are verified in src/auth.ts. verifyLogin() re-hashes the attempt with the
 stored salt via hashPassword() (SHA-256) and compares it to the stored hash…
@@ -31,7 +31,7 @@ Sources:
 ## Stack
 - **Node ≥ 24**, TypeScript (run with `--experimental-sqlite`)
 - `node:sqlite` + [`sqlite-vec`](https://github.com/asg017/sqlite-vec) + FTS5 — embedded hybrid store, no native compile
-- `@xenova/transformers` — local 384-dim embeddings (swap via `DEVTOOL_EMBED_MODEL`)
+- `@xenova/transformers` — local 384-dim embeddings (swap via `QUARRY_EMBED_MODEL`)
 - local **Ollama** — default `analyze` LLM (free); `@anthropic-ai/sdk` optional fallback
 - `commander` (CLI), `simple-git` (optional cloning), `vitest` (tests)
 
@@ -47,7 +47,7 @@ node dist/cli.js analyze-ticket --fixture ./tests/fixtures/jira-issue.json   # t
 node dist/cli.js stats
 ```
 First `index` downloads the embedding model once, then runs offline. `analyze`/`analyze-ticket` need a
-local model: `ollama serve` + `ollama pull llama3.1` (or set `DEVTOOL_PROVIDER=anthropic` + a key).
+local model: `ollama serve` + `ollama pull llama3.1` (or set `QUARRY_PROVIDER=anthropic` + a key).
 
 ## Run it three ways
 1. **Native** — `pnpm install && pnpm build` (Node 24). Nothing to compile.
@@ -59,7 +59,7 @@ local model: `ollama serve` + `ollama pull llama3.1` (or set `DEVTOOL_PROVIDER=a
 
 ## Use as a library
 ```ts
-import { VectorStore, EmbeddingGenerator, AnalysisAgent, loadJiraFixture } from "devtool-rag";
+import { VectorStore, EmbeddingGenerator, AnalysisAgent, loadJiraFixture } from "quarry";
 ```
 See `src/index.ts` for the full surface.
 
