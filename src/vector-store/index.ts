@@ -135,8 +135,19 @@ export class VectorStore {
   /**
    * Hybrid search: dense KNN (sqlite-vec) + BM25 (FTS5), fused with RRF.
    * `similarity` on results is the dense cosine score where available.
+   *
+   * `opts.mode` is an optional evaluation hook: the default `"hybrid"`
+   * preserves production behaviour exactly; `"dense"` skips the BM25 leg so
+   * dense-only retrieval can be A/B'd (used by scripts/eval.ts). It does not
+   * change any default code path.
    */
-  search(queryEmbedding: number[], query: string, limit = 10): CodeChunk[] {
+  search(
+    queryEmbedding: number[],
+    query: string,
+    limit = 10,
+    opts: { mode?: "hybrid" | "dense" } = {},
+  ): CodeChunk[] {
+    const mode = opts.mode ?? "hybrid";
     const pool = Math.max(limit * 4, 20);
 
     const dense = this.db
@@ -148,7 +159,7 @@ export class VectorStore {
       distance: number;
     }>;
 
-    const ftsExpr = toFtsQuery(query);
+    const ftsExpr = mode === "dense" ? null : toFtsQuery(query);
     const bm25 = ftsExpr
       ? (this.db
           .prepare(

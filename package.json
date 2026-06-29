@@ -13,8 +13,9 @@
     "build": "tsc -p tsconfig.json",
     "dev": "NODE_OPTIONS=--experimental-sqlite tsx src/cli.ts",
     "check": "tsc --noEmit -p tsconfig.json",
-    "lint": "biome check src tests",
-    "test": "NODE_OPTIONS=--experimental-sqlite vitest run"
+    "lint": "biome check src tests scripts",
+    "test": "NODE_OPTIONS=--experimental-sqlite vitest run",
+    "eval": "NODE_OPTIONS=--experimental-sqlite tsx scripts/eval.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.32.1",
