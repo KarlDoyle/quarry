@@ -1,0 +1,13 @@
+{
+  "name": "devtool-rag",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:24",
+  "postCreateCommand": "corepack enable && pnpm install",
+  "customizations": {
+    "vscode": {
+      "extensions": ["biomejs.biome"]
+    }
+  },
+  "remoteEnv": {
+    "OLLAMA_HOST": "http://host.docker.internal:11434"
+  }
+}

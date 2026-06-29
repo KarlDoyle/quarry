@@ -1,0 +1,28 @@
+# Optional: run the tool + a local Ollama side-by-side, fully offline, no host setup.
+# `docker compose run --rm app index examples/sample-repo` then
+# `docker compose run --rm app analyze "how is the cart total calculated?"`
+services:
+  app:
+    build: .
+    environment:
+      - OLLAMA_HOST=http://ollama:11434
+      - DEVTOOL_DATA_DIR=/data
+    volumes:
+      - data:/data
+    depends_on:
+      ollama:
+        condition: service_healthy
+
+  ollama:
+    image: ollama/ollama:latest
+    volumes:
+      - ollama:/root/.ollama
+    healthcheck:
+      test: ["CMD", "ollama", "list"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+volumes:
+  data: {}
+  ollama: {}

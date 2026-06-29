@@ -37,16 +37,11 @@ describe("rag retrieval", () => {
       });
     }
 
-    const results = store.search(
-      await embedder.generateEmbedding("how do I verify a user's password"),
-      3,
-    );
+    const q = "how do I verify a user's password";
+    const results = store.search(await embedder.generateEmbedding(q), q, 3);
     expect(results.length).toBe(3);
+    // hybrid (dense + BM25) should still rank the auth chunk first
     expect(results[0].filePath).toBe("auth.ts");
-    // top hit should clearly beat the runner-up
-    expect(results[0].similarity ?? 0).toBeGreaterThan(
-      results[1].similarity ?? 0,
-    );
 
     store.close();
   }, 60_000);

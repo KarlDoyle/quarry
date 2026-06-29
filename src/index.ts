@@ -10,8 +10,23 @@ export {
   type ChunkMetadata,
 } from "./vector-store/index.js";
 export { RepositoryIndexer, type IndexResult } from "./indexer/index.js";
-export { EmbeddingGenerator } from "./indexer/embedding-generator.js";
+export {
+  EmbeddingGenerator,
+  type Embedder,
+} from "./indexer/embedding-generator.js";
 export { ASTParser, type CodeEntity } from "./indexer/ast-parser.js";
+export {
+  JiraClient,
+  parseJiraIssue,
+  loadJiraFixture,
+  type Ticket,
+} from "./ingest/jira.js";
+export {
+  GitHubClient,
+  parseRepo,
+  loadRepoFixture,
+  type RepoInfo,
+} from "./ingest/github.js";
 export {
   AnalysisAgent,
   type AnalysisResult,
@@ -21,5 +36,6 @@ export {
   type LLMProvider,
   OllamaProvider,
   AnthropicProvider,
+  FallbackProvider,
 } from "./agent/providers.js";
 export { createLogger, type ILogger } from "./logger.js";
