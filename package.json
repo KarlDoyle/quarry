@@ -15,6 +15,7 @@
     "check": "tsc --noEmit -p tsconfig.json",
     "lint": "biome check src tests scripts",
     "test": "NODE_OPTIONS=--experimental-sqlite vitest run",
+    "coverage": "NODE_OPTIONS=--experimental-sqlite vitest run --coverage",
     "eval": "NODE_OPTIONS=--experimental-sqlite tsx scripts/eval.ts",
     "prepare": "git config core.hooksPath .githooks"
   },
@@ -28,6 +29,7 @@
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
     "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^2.1.9",
     "tsx": "^4.19.2",
     "typescript": "^5.7.2",
     "vitest": "^2.1.8"

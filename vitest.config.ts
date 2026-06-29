@@ -13,6 +13,21 @@ export default defineConfig({
     server: {
       deps: { external: ["node:sqlite", "sqlite", /sqlite-vec/] },
     },
+    coverage: {
+      provider: "v8",
+      reporter: ["text", "html"],
+      include: ["src/**"],
+      exclude: ["dist/**", "build/**", "scripts/**", "tests/**", "**/*.config.*", "**/*.d.ts"],
+      // Ratchet: thresholds sit at/just below current measured coverage to stop
+      // regression. Measured 2026-06-29: stmts 60.23 / branch 66.04 / funcs
+      // 76.66 / lines 60.23. Bump these up as coverage improves; never down.
+      thresholds: {
+        statements: 60,
+        branches: 66,
+        functions: 76,
+        lines: 60,
+      },
+    },
   },
   ssr: {
     external: ["node:sqlite", "sqlite", "sqlite-vec"],
