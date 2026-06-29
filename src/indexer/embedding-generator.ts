@@ -13,7 +13,7 @@ const DEFAULT_MODEL = "Xenova/all-MiniLM-L6-v2";
 /**
  * Local, in-process embeddings via transformers.js — no server, no API key, so
  * indexing + search work fully offline (and inside a container). The model is
- * swappable with DEVTOOL_EMBED_MODEL (any transformers.js feature-extraction
+ * swappable with QUARRY_EMBED_MODEL (any transformers.js feature-extraction
  * model); the default is the 384-dim all-MiniLM-L6-v2.
  */
 export class EmbeddingGenerator implements Embedder {
@@ -21,7 +21,7 @@ export class EmbeddingGenerator implements Embedder {
   readonly modelName: string;
 
   constructor(
-    modelName: string = process.env.DEVTOOL_EMBED_MODEL ?? DEFAULT_MODEL,
+    modelName: string = process.env.QUARRY_EMBED_MODEL ?? DEFAULT_MODEL,
   ) {
     this.modelName = modelName;
   }

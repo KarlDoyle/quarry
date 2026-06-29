@@ -2,11 +2,11 @@
 # Pre-push gate (Node) — the ai-starter standard.
 #
 # Runs the same checks CI runs, locally, before code leaves the machine:
-#   1. typecheck (devtool-rag exposes this as `pnpm check`)
+#   1. typecheck (Quarry exposes this as `pnpm check`)
 #   2. tests (includes tests/secret-scan.test.ts)
 # Blocks the push on failure so drift can't reach the remote.
 #
-# NOTE: devtool-rag's `check`/`test` scripts carry `NODE_OPTIONS=--experimental-sqlite`
+# NOTE: Quarry's `check`/`test` scripts carry `NODE_OPTIONS=--experimental-sqlite`
 # internally (it uses node:sqlite), so this hook just invokes the named scripts
 # and the flag rides along — the gate doesn't need to know about it.
 #

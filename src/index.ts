@@ -1,5 +1,5 @@
 /**
- * devtool-rag — public library surface.
+ * Quarry — public library surface.
  * Use the CLI for the common path; import these to embed RAG in your own tools.
  */
 export { loadConfig, dbPath, type Config } from "./config.js";

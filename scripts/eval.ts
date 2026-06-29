@@ -1,5 +1,5 @@
 /**
- * Retrieval-quality eval harness for devtool-rag.
+ * Retrieval-quality eval harness for Quarry.
  *
  * Indexes a real repo once into a temp VectorStore, then runs every gold-set
  * query through retrieval and reports recall@1/3/5, MRR, and per-query
@@ -81,11 +81,11 @@ function dirSizeBytes(dbPath: string): number {
 async function main(): Promise<void> {
   const goldset = JSON.parse(readFileSync(goldsetPath, "utf-8")) as GoldSet;
   const queries = goldset.queries;
-  console.log(`devtool-rag eval — corpus=${goldset.corpus ?? repoPath}`);
+  console.log(`Quarry eval — corpus=${goldset.corpus ?? repoPath}`);
   console.log(`gold-set: ${queries.length} queries (${goldsetPath})`);
   console.log(`repo: ${repoPath}\n`);
 
-  const tmp = mkdtempSync(join(tmpdir(), "devtool-rag-eval-"));
+  const tmp = mkdtempSync(join(tmpdir(), "quarry-eval-"));
   const dbPath = join(tmp, "index.db");
   const store = new VectorStore(dbPath);
 

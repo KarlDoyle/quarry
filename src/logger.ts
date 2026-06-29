@@ -1,10 +1,10 @@
 /**
  * Minimal structured logger. Zero dependencies.
- * Set DEVTOOL_LOG=debug for verbose output; defaults to info.
+ * Set QUARRY_LOG=debug for verbose output; defaults to info.
  */
 type Level = "debug" | "info" | "warn" | "error";
 const ORDER: Record<Level, number> = { debug: 0, info: 1, warn: 2, error: 3 };
-const threshold = ORDER[(process.env.DEVTOOL_LOG as Level) ?? "info"] ?? 1;
+const threshold = ORDER[(process.env.QUARRY_LOG as Level) ?? "info"] ?? 1;
 
 export interface ILogger {
   debug(msg: string, meta?: unknown): void;

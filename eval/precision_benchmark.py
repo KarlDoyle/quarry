@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-precision_benchmark.py — devtool-rag ("Quarry") precision-tier benchmark.
+precision_benchmark.py — Quarry precision-tier benchmark.
 
 Measures whether the *precision* tier levers actually move retrieval quality,
 WITHOUT touching the laptop. Designed to be pasted/uploaded into a free Google
@@ -368,7 +368,7 @@ def run_config(name, embed_model_name, texts, paths, queries, gold_queries,
 
 def print_table(rows, meta):
     print("\n" + "=" * 72)
-    print(f"devtool-rag (Quarry) — precision benchmark")
+    print(f"Quarry — precision benchmark")
     print(f"corpus={meta['corpus']}  files={meta['files']}  chunks={meta['chunks']}"
           f"  queries={meta['queries']}")
     print("=" * 72)
