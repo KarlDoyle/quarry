@@ -68,7 +68,23 @@ See `src/index.ts` for the full surface.
 pnpm check   # typecheck
 pnpm lint    # biome
 pnpm test    # vitest: hybrid retrieval, ticket triage (LLM mocked), recall@3 gold set — no network
+pnpm coverage # vitest run --coverage (enforces the ratchet thresholds below)
 ```
+
+### Coverage
+
+Coverage is a **ratchet, not a stretch goal**: thresholds are pinned at/just below the current
+measured numbers so coverage can only go up, never silently regress. Measured on `src/` (2026-06-29):
+
+| Metric | Measured | Threshold |
+| --- | --- | --- |
+| Statements | 60.23% | 60% |
+| Branches | 66.04% | 66% |
+| Functions | 76.66% | 76% |
+| Lines | 60.23% | 60% |
+
+Coverage is honestly mid: the CLI, config, and ingest/provider edges are largely untested, while the
+indexer and vector store are well covered. Raise the thresholds in `vitest.config.ts` as tests grow.
 
 ## Roadmap
 - ✅ Local index → **hybrid** search → grounded analysis, single `node:sqlite` file
