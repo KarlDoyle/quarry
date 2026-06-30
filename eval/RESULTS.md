@@ -40,6 +40,11 @@ excluded).
 (recall@k and MRR are deterministic and identical run-to-run; latency figures
 are representative of two runs on the same machine and vary by < 0.5 ms.)
 
+> **Re-verified 2026-06-30.** Re-ran `pnpm eval` on the current `moss` corpus,
+> which has since grown to **293 files / 1,523 chunks** (from 233 / 1,459). Every
+> `recall@k` figure was **identical**; hybrid `MRR` measured `0.639` (vs `0.633`).
+> The benchmark is stable as the corpus grows — a good robustness signal.
+
 A/B is fair: the index is built once and both modes query the same store. The
 only difference is the dense-only path skips the BM25 leg via the optional
 `VectorStore.search(..., { mode: "dense" })` hook added for this eval — the

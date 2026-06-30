@@ -86,11 +86,34 @@ measured numbers so coverage can only go up, never silently regress. Measured on
 Coverage is honestly mid: the CLI, config, and ingest/provider edges are largely untested, while the
 indexer and vector store are well covered. Raise the thresholds in `vitest.config.ts` as tests grow.
 
+## Benchmarks
+
+Retrieval quality is **measured, not claimed** — `pnpm eval` runs a 28-query gold set
+against a real codebase (`moss`) and reports recall@k + MRR for hybrid vs dense-only
+retrieval. Latest (re-verified 2026-06-30, 293-file corpus):
+
+| Mode | recall@1 | recall@3 | recall@5 | MRR | search p50 |
+| --- | --- | --- | --- | --- | --- |
+| **hybrid** (dense + BM25 + RRF) | 42.9% | 82.1% | 85.7% | 0.639 | ~1.3 ms |
+| dense-only (sqlite-vec) | 50.0% | 75.0% | 92.9% | 0.664 | ~0.5 ms |
+
+Read it honestly: a strong **top-k** stage to feed an LLM (a relevant file in the top 3
+for ~82% of queries), not a top-1 jump-to-file engine. `recall@k` is deterministic and
+held identical as the corpus grew 233→293 files. Full method + caveats: [`eval/RESULTS.md`](eval/RESULTS.md).
+
+```bash
+pnpm eval ~/Dev/moss eval/moss-goldset.json   # index once, measure both modes
+```
+
+> These are **recall@k / MRR** (retrieval) — *not* precision@k; named honestly. A
+> higher-precision tier (code-specific embedder + cross-encoder reranker) is speced in
+> [`docs/EVAL-AND-PRECISION.md`](docs/EVAL-AND-PRECISION.md) and not yet measured on real data.
+
 ## Roadmap
 - ✅ Local index → **hybrid** search → grounded analysis, single `node:sqlite` file
 - ✅ Ticket triage (Jira ingest), swappable embeddings, Ollama→Anthropic fallback, devcontainer + Docker
+- ✅ Route the LLM through [moss](https://github.com/KarlDoyle/moss) as a shared local-first model layer (via the exported `MossProvider`; live-verified)
 - ◻ Incremental re-index (per-file) · richer symbol-level parsing · cross-encoder rerank (only if precision needs it)
-- ◻ Route the LLM through [moss](https://github.com/KarlDoyle/moss) as a shared local-first model layer
 
 *Deliberately kept out (to stay lean): tree-sitter native grammars, agentic multi-step loops, heavy eval frameworks.*
 
