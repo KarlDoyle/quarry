@@ -37,5 +37,6 @@ export {
   OllamaProvider,
   AnthropicProvider,
   FallbackProvider,
+  MossProvider,
 } from "./agent/providers.js";
 export { createLogger, type ILogger } from "./logger.js";

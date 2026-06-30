@@ -1,0 +1,10 @@
+# CODEOWNERS — maps each area of Quarry to the team that owns it.
+# Read by tools like `marshal route` to name the owning team for a ticket's code.
+# (Area handles are illustrative owning teams; the catch-all is a real owner.)
+*                     @KarlDoyle
+/src/agent/           @quarry/agent
+/src/indexer/         @quarry/retrieval
+/src/vector-store/    @quarry/retrieval
+/src/ingest/          @quarry/integrations
+/scripts/             @quarry/tooling
+/eval/                @quarry/tooling

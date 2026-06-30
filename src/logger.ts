@@ -17,9 +17,10 @@ export function createLogger(scope: string): ILogger {
   const emit = (level: Level, msg: string, meta?: unknown) => {
     if (ORDER[level] < threshold) return;
     const line = `[${level.toUpperCase()}] ${scope}: ${msg}`;
-    const stream =
-      level === "error" || level === "warn" ? console.error : console.log;
-    meta === undefined ? stream(line) : stream(line, meta);
+    // All logs go to stderr so stdout stays clean for piped data output (JSON,
+    // search results, an enriched spec) — `quarry … | jq` and `marshal triage … | jq`
+    // must not see log lines.
+    meta === undefined ? console.error(line) : console.error(line, meta);
   };
   return {
     debug: (m, meta) => emit("debug", m, meta),
