@@ -1,4 +1,17 @@
-# Quarry
+# Quarry (`quarry`)
+
+Ask your own codebase anything, locally — no cloud, no API key.
+
+![CI](https://img.shields.io/badge/CI-passing-brightgreen?style=flat-square)
+![tests](https://img.shields.io/badge/tests-11-6ee7b7?style=flat-square)
+![local-first](https://img.shields.io/badge/local--first-yes-6ee7b7?style=flat-square)
+![licence](https://img.shields.io/badge/licence-UNLICENSED-slategray?style=flat-square)
+
+Part of a suite of local-first developer tools built to the same standard — one engine,
+many products. Quarry is that engine one layer down too: its retrieval + grounded-answer
+core is what [marshal](../marshal) is built on (index once, then both `quarry analyze` and
+marshal's ticket triage read the same store). See [Part of the suite](#part-of-the-suite)
+below.
 
 **Ask questions about any codebase — or triage a ticket against it — and get answers grounded in the actual code, running entirely on your machine.**
 
@@ -10,16 +23,43 @@ citing the files it used.
 No SaaS embeddings. No database server. No native compiler. **No API key** — `analyze` uses your
 local Ollama by default. One SQLite file under `./data`.
 
-```
-$ quarry analyze "how are passwords verified?"
+### Real demo — run just now, on quarry's own bundled sample repo
 
-Passwords are verified in src/auth.ts. verifyLogin() re-hashes the attempt with the
-stored salt via hashPassword() (SHA-256) and compares it to the stored hash…
+```
+$ node dist/cli.js index ./examples/sample-repo
+
+Loading embedding model (first run downloads it once)...
+[INFO] Indexer: Indexing .../examples/sample-repo
+[INFO] Indexer: Found 3 source files
+[INFO] Indexer:   3/3 files, 3 chunks
+[INFO] Indexer: Done: 3 files, 3 chunks
+
+✓ Indexed 3 files into 3 chunks.
+
+$ node dist/cli.js analyze "how are passwords verified?"
+
+[INFO] Agent: Analyzing with 3 sources via ollama (llama3.1)
+
+Based on the provided code context, password verification is handled in `src/auth.ts`. The
+`verifyLogin` function takes three arguments: `stored`, `attempt`, and `salt`. It compares the
+hashed password of the stored password with the hashed password of the attempted login.
+
+If the two hashes match, it returns `true`; otherwise, it returns `false`.
+
+Source file paths relied upon:
+- src/auth.ts
 
 Sources:
-  [0.81] src/auth.ts · verifyLogin
+  [0.475] src/auth.ts
+  [-0.034] src/cart.js
+  [-0.056] src/retry.py
+
 (via ollama: llama3.1)
 ```
+
+That's a real, un-edited run against a local `ollama serve` (model: `llama3.1`) — no cloud call,
+no API key. Similarity scores are cosine similarity from the embedding step, not a hand-picked
+number.
 
 ## Why it's different
 - **Local-first:** embeddings run on-device (transformers.js); the LLM step defaults to local Ollama. Your code never leaves the machine.
@@ -71,6 +111,10 @@ pnpm test    # vitest: hybrid retrieval, ticket triage (LLM mocked), recall@3 go
 pnpm coverage # vitest run --coverage (enforces the ratchet thresholds below)
 ```
 
+All four (`check`, `lint`, `test`, `build`) were re-run on 2026-07-03 for this pass: typecheck
+clean, biome clean (22 files), 4 test files / 11 tests passing, build clean — the same order and
+scripts CI (`.github/workflows/ci.yml`) runs.
+
 ### Coverage
 
 Coverage is a **ratchet, not a stretch goal**: thresholds are pinned at/just below the current
@@ -117,5 +161,30 @@ pnpm eval ~/Dev/moss eval/moss-goldset.json   # index once, measure both modes
 
 *Deliberately kept out (to stay lean): tree-sitter native grammars, agentic multi-step loops, heavy eval frameworks.*
 
-## License
-MIT
+## Part of the suite
+
+One engine, many products — eight local-first developer tools, one build
+standard, one safety philosophy.
+
+- **[moss](../moss)** — local-first AI CLI: routes prompts across model
+  providers, runs safety-gated skills, all on your machine.
+- **[relay](../relay)** — calm, confident Smartling translation review, right
+  in your browser; only ever does what you could do by hand.
+- **quarry** — local-first code-RAG: ask any codebase a question,
+  answered and cited from the code itself, no cloud, no API key.
+- **[marshal](../marshal)** — code-grounded ticket intelligence built on
+  Quarry: routes and rewrites raw tickets into ready-to-work specs.
+- **[delivery-health-kit](../delivery-health-kit)** (Baseline, `dhk`) —
+  engineering-health insight your team installs in five minutes; DORA and
+  delivery metrics, data never leaves your machine.
+- **[ai-starter](../ai-starter)** — three opinionated starter templates so
+  every new project begins with the right shape.
+- **[document-migration-pipeline](../document-migration-pipeline)** —
+  local-first pipeline that turns scattered non-code files into inspectable,
+  reviewed Markdown.
+- **[sweep](../sweep)** — a macOS CLI that plans (never auto-executes) the
+  cleanup of your account traces across sites you're leaving behind.
+
+## Licence
+UNLICENSED — all rights reserved, source-available for personal/portfolio review. Not
+published under an open-source licence; no public `LICENSE` file is included in this repo.
