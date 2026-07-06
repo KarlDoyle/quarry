@@ -37,9 +37,11 @@ on:
     workflows: ["ci"]
     types: [completed]
   schedule:
-    # Hourly poll — the only way Tier 1's delay_hours ever elapses without a
-    # fresh CI run to wake this workflow up.
-    - cron: "17 * * * *"
+    # Six-hourly poll — how Tier 1's delay_hours elapses without a fresh CI
+    # run to wake this workflow up. (Hourly proved needlessly expensive:
+    # each run bills a 1-minute minimum, and an hourly cron across the
+    # private estate alone would exhaust the free Actions tier.)
+    - cron: "17 */6 * * *"
   workflow_dispatch: {}
 
 permissions:
