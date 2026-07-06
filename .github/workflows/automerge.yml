@@ -31,7 +31,9 @@ name: automerge
 
 on:
   workflow_run:
-    # must exactly match the `name:` field of this repo's CI workflow
+    # EDIT-ME: must exactly match the `name:` field of this repo's CI
+    # workflow (the one whose green run is the trust signal). Read
+    # .github/workflows/ci.yml (or equivalent) to find it.
     workflows: ["ci"]
     types: [completed]
   schedule:
@@ -176,20 +178,48 @@ jobs:
                   return "minor"
               return "patch"
 
-          def checks_green(pr_number):
-              out = gh("pr", "checks", str(pr_number), "--repo", REPO, "--json", "name,bucket")
+          def commit_checks_green(pr_number):
+              # Fallback for PRs whose head got CI via workflow_dispatch (e.g.
+              # GITHUB_TOKEN-authored seed PRs, which never trigger organic
+              # pull_request CI): dispatched runs do not appear in the PR's
+              # check rollup, but they DO create check-runs on the head
+              # commit. Same SHA, same CI, still fail-closed when empty.
+              head = gh_json("pr", "view", str(pr_number), "--repo", REPO,
+                             "--json", "headRefOid")
+              sha = (head or {}).get("headRefOid", "")
+              if not sha:
+                  return False, "no head SHA"
+              out = gh("api", f"repos/{REPO}/commits/{sha}/check-runs",
+                       "--jq", "[.check_runs[] | {name, status, conclusion}]")
               if out is None:
                   return False, "no checks reported"
               try:
-                  checks = json.loads(out)
+                  runs = json.loads(out)
               except json.JSONDecodeError:
-                  return False, "unparseable checks output"
-              if not checks:
+                  return False, "unparseable check-runs output"
+              runs = [r for r in runs if r.get("name") != "evaluate"]
+              if not runs:
                   return False, "no checks reported"
-              bad = [c for c in checks if c.get("bucket") not in ("pass", "skipping")]
+              bad = [r for r in runs
+                     if r.get("status") != "completed"
+                     or r.get("conclusion") not in ("success", "skipped")]
               if bad:
-                  return False, f"not green: {[c['name'] for c in bad]}"
-              return True, "all green"
+                  return False, f"not green (commit check-runs): {[r['name'] for r in bad]}"
+              return True, "all green (commit check-runs)"
+
+          def checks_green(pr_number):
+              out = gh("pr", "checks", str(pr_number), "--repo", REPO, "--json", "name,bucket")
+              if out is not None:
+                  try:
+                      checks = json.loads(out)
+                  except json.JSONDecodeError:
+                      return False, "unparseable checks output"
+                  if checks:
+                      bad = [c for c in checks if c.get("bucket") not in ("pass", "skipping")]
+                      if bad:
+                          return False, f"not green: {[c['name'] for c in bad]}"
+                      return True, "all green"
+              return commit_checks_green(pr_number)
 
           def pr_age_hours(created_at):
               created = datetime.strptime(created_at, "%Y-%m-%dT%H:%M:%SZ").replace(tzinfo=timezone.utc)
@@ -206,9 +236,22 @@ jobs:
               "--limit", "200",
           ) or []
 
+          def canon(login):
+              # gh renders the same bot as "app/github-actions",
+              # "github-actions", or "github-actions[bot]" depending on
+              # the API path -- normalise before any allow-list check.
+              login = login or ""
+              if login.startswith("app/"):
+                  login = login[len("app/"):]
+              if login.endswith("[bot]"):
+                  login = login[: -len("[bot]")]
+              return login
+
+          tier0_authors_canon = {canon(a) for a in tier0_authors}
+
           for pr in prs:
               n = pr["number"]
-              author = (pr.get("author") or {}).get("login", "")
+              author = canon((pr.get("author") or {}).get("login", ""))
               title = pr.get("title", "")
               is_fork = pr.get("isCrossRepository", False)
               is_draft = pr.get("isDraft", False)
@@ -222,7 +265,7 @@ jobs:
               if tier0_same_repo_only and is_fork:
                   print("skip: cross-repository (fork) PR -- never eligible")
                   continue
-              if author not in tier0_authors and author != "dependabot[bot]":
+              if author not in tier0_authors_canon and author != "dependabot":
                   print(f"skip: author {author!r} not on the automerge allow-list -- human PRs are always Tier 2")
                   continue
 
@@ -238,7 +281,7 @@ jobs:
 
               all_within_tier0_paths = bool(paths) and all(matches_any(p, tier0_allow_paths) for p in paths)
 
-              if author in tier0_authors and all_within_tier0_paths:
+              if author in tier0_authors_canon and all_within_tier0_paths:
                   ok, why = checks_green(n)
                   if not ok:
                       print(f"tier0 candidate, not merging yet: {why}")
@@ -246,7 +289,7 @@ jobs:
                   merge(n, f"Tier 0 -- author {author} on allow-listed paths, checks green")
                   continue
 
-              if author == "dependabot[bot]":
+              if author == "dependabot":
                   if all_within_tier0_paths:
                       ok, why = checks_green(n)
                       if not ok:
