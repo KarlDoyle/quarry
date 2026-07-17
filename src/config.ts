@@ -40,7 +40,7 @@ export function loadConfig(): Config {
   const provider: ProviderName =
     process.env.QUARRY_PROVIDER === "anthropic" ? "anthropic" : "ollama";
   const defaultModel =
-    provider === "anthropic" ? "claude-3-5-haiku-latest" : "llama3.1";
+    provider === "anthropic" ? "claude-haiku-4-5-20251001" : "llama3.1";
   // Default keeps the current behaviour (direct Ollama). Opt into the moss
   // router with QUARRY_LLM=moss.
   const llmRouter: LlmRouter =
