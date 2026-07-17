@@ -119,7 +119,7 @@ function buildProvider(config: Config): LLMProvider {
     ? new FallbackProvider(
         ollama,
         new AnthropicProvider(
-          "claude-3-5-haiku-latest",
+          "claude-haiku-4-5-20251001",
           config.anthropicApiKey,
         ),
       )
