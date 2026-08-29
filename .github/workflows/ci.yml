@@ -44,9 +44,12 @@ jobs:
       - name: Lint
         run: pnpm lint
 
-      # 3. Tests — unit + the secret-scan boundary test.
+      # 3. Tests — unit + the secret-scan boundary test. Run with coverage so
+      #    the ratchet in vitest.config.ts actually enforces (was previously
+      #    `pnpm test`, which skips the --coverage flag and never triggers
+      #    the thresholds — the ratchet was defined but not a real gate).
       - name: Test
-        run: pnpm test
+        run: pnpm coverage
 
       # 4. Build last — the most expensive step.
       - name: Build
