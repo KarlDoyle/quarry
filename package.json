@@ -23,15 +23,15 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.126.0",
-    "@huggingface/transformers": "^3.8.1",
-    "commander": "^12.1.0",
+    "@huggingface/transformers": "^4.3.0",
+    "commander": "^15.0.0",
     "moss": "link:../moss",
     "simple-git": "^3.27.0",
     "sqlite-vec": "^0.1.6"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
-    "@types/node": "^24.0.0",
+    "@types/node": "^26.6.1",
     "@vitest/coverage-v8": "^5.0.1",
     "tsx": "^4.23.13",
     "typescript": "^7.0.2",
