@@ -4,5 +4,9 @@ allowBuilds:
   '@biomejs/biome': true
   better-sqlite3: true
   esbuild: true
-  protobufjs: false
+  onnxruntime-node: true
   sharp: true
+overrides:
+  # transformers v3 pins sharp ^0.34; 0.35.4 patches two high-severity advisories and
+  # quarry only ever uses the text path, so the image API change cannot reach it.
+  sharp: ">=0.35.4"

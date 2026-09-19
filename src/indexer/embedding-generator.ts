@@ -30,10 +30,12 @@ export class EmbeddingGenerator implements Embedder {
     try {
       logger.info(`Initializing embedding model (${this.modelName})...`);
       // Dynamically import to avoid WASM issues
-      const { pipeline } = await import("@xenova/transformers");
+      const { pipeline } = await import("@huggingface/transformers");
       logger.info("Loading model (first run downloads it once)...");
+      // v3 replaced `quantized: true` with an explicit dtype; q8 is the same 8-bit
+      // weights the old flag selected.
       this.model = await pipeline("feature-extraction", this.modelName, {
-        quantized: true,
+        dtype: "q8",
       });
       logger.info("Embedding model initialized successfully");
     } catch (error) {
