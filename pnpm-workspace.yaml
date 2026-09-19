@@ -5,6 +5,7 @@ allowBuilds:
   better-sqlite3: true
   esbuild: true
   onnxruntime-node: true
+  protobufjs: false
   sharp: true
 overrides:
   # transformers v3 pins sharp ^0.34; 0.35.4 patches two high-severity advisories and
