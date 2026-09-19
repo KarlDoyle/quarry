@@ -15,7 +15,7 @@ import { type Config, dbPath, loadConfig } from "./config.js";
 import { EmbeddingGenerator } from "./indexer/embedding-generator.js";
 import { RepositoryIndexer } from "./indexer/index.js";
 import { loadRepoFixture } from "./ingest/github.js";
-import { JiraClient, type Ticket, loadJiraFixture } from "./ingest/jira.js";
+import { JiraClient, loadJiraFixture, type Ticket } from "./ingest/jira.js";
 import { VectorStore } from "./vector-store/index.js";
 
 const program = new Command();
