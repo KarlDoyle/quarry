@@ -13,7 +13,9 @@
     "build": "tsc -p tsconfig.json",
     "dev": "NODE_OPTIONS=--experimental-sqlite tsx src/cli.ts",
     "check": "tsc --noEmit -p tsconfig.json",
-    "lint": "biome check src tests scripts",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
     "test": "NODE_OPTIONS=--experimental-sqlite vitest run",
     "coverage": "NODE_OPTIONS=--experimental-sqlite vitest run --coverage",
     "eval": "NODE_OPTIONS=--experimental-sqlite tsx scripts/eval.ts",
@@ -28,12 +30,14 @@
     "sqlite-vec": "^0.1.6"
   },
   "devDependencies": {
-    "@biomejs/biome": "^1.9.4",
+    "@biomejs/biome": "^2.5.14",
     "@types/node": "^24.0.0",
-    "@vitest/coverage-v8": "^2.1.9",
+    "@vitest/coverage-v8": "^5.0.1",
     "tsx": "^4.23.13",
-    "typescript": "^5.7.2",
-    "vitest": "^2.1.8"
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
   },
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "packageManager": "pnpm@11.5.2"
 }

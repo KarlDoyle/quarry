@@ -6,10 +6,13 @@ import { defineConfig } from "vitest/config";
 // is used.
 export default defineConfig({
   test: {
+    // Only this repo's own suite. Without an explicit include, a git worktree
+    // under .claude/worktrees is discovered too and every test runs twice.
+    include: ["tests/**/*.test.ts"],
     pool: "forks",
-    poolOptions: {
-      forks: { execArgv: ["--experimental-sqlite"] },
-    },
+    // Vitest 4 flattened `poolOptions.forks.*` to top level.
+    execArgv: ["--experimental-sqlite"],
+    setupFiles: ["tests/setup-env.ts"],
     server: {
       deps: { external: ["node:sqlite", "sqlite", /sqlite-vec/] },
     },
@@ -17,7 +20,14 @@ export default defineConfig({
       provider: "v8",
       reporter: ["text", "html"],
       include: ["src/**"],
-      exclude: ["dist/**", "build/**", "scripts/**", "tests/**", "**/*.config.*", "**/*.d.ts"],
+      exclude: [
+        "dist/**",
+        "build/**",
+        "scripts/**",
+        "tests/**",
+        "**/*.config.*",
+        "**/*.d.ts",
+      ],
       // Ratchet: thresholds sit at/just below current measured coverage to stop
       // regression. Measured 2026-06-29: stmts 60.23 / branch 66.04 / funcs
       // 76.66 / lines 60.23. Bump these up as coverage improves; never down.
@@ -29,11 +39,19 @@ export default defineConfig({
       // match reality so the gate passes honestly instead of being silently
       // skipped; branch/funcs are untouched since they still clear the old
       // bar. Treat 58.5 as the real floor to climb back from, not a target.
+      //
+      // Raised 2026-09-19 (Vitest 5). @vitest/coverage-v8 v5 remaps coverage
+      // through the AST, so statements/branches/functions are now counted
+      // properly instead of being approximated by lines — the same suite
+      // measured 51.03 / 43.01 / 59.57 / 51.92 under the new counting. New
+      // tests for config, ingest (http/github/jira), providers and
+      // file-patterns took it to 66.35 / 68.38 / 78.72 / 66.12; the bars below
+      // sit just under that. Never lower them.
       thresholds: {
-        statements: 58,
-        branches: 66,
-        functions: 76,
-        lines: 58,
+        statements: 65,
+        branches: 67,
+        functions: 78,
+        lines: 65,
       },
     },
   },

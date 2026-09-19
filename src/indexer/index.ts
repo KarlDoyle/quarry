@@ -6,8 +6,8 @@ import { ASTParser, type CodeEntity } from "./ast-parser.js";
 import { createSmartChunks } from "./chunking-strategies.js";
 import { EmbeddingGenerator } from "./embedding-generator.js";
 import {
-  FILE_PATTERNS,
   detectLanguage,
+  FILE_PATTERNS,
   shouldIndexFile,
 } from "./file-patterns.js";
 
