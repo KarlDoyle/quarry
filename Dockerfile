@@ -1,7 +1,7 @@
 # Reproducible run environment for reviewers — runs on any OCI runtime
 # (OrbStack, Colima, Podman, Docker). node:24-slim (glibc) so transformers.js +
 # its native bits work without alpine/musl pain. node:sqlite needs no compile.
-FROM node:24-slim AS build
+FROM node:26-slim AS build
 WORKDIR /app
 RUN corepack enable
 COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
@@ -10,7 +10,7 @@ COPY tsconfig.json biome.json ./
 COPY src ./src
 RUN pnpm build
 
-FROM node:24-slim AS runtime
+FROM node:26-slim AS runtime
 WORKDIR /app
 ENV NODE_ENV=production
 RUN corepack enable
