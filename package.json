@@ -22,7 +22,7 @@
     "prepare": "git config core.hooksPath .githooks"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.126.0",
+    "@anthropic-ai/sdk": "^0.128.0",
     "@huggingface/transformers": "^3.8.1",
     "commander": "^12.1.0",
     "moss": "link:../moss",
@@ -31,12 +31,12 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.14",
-    "@types/node": "^24.0.0",
-    "@vitest/coverage-v8": "^5.0.1",
-    "tsx": "^4.23.13",
+    "@types/node": "^24.13.6",
+    "@vitest/coverage-v8": "^5.0.2",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
-    "vite": "^8.3.0",
-    "vitest": "^5.0.1"
+    "vite": "^8.3.1",
+    "vitest": "^5.0.2"
   },
   "license": "UNLICENSED",
   "packageManager": "pnpm@11.5.2"
