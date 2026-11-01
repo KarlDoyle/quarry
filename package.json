@@ -1,8 +1,25 @@
 {
-  "name": "quarry",
+  "name": "@karldoyle/quarry",
   "version": "0.2.0",
   "description": "Local-first semantic + keyword code search and ticket triage. Index any repo, ask questions or triage a Jira ticket, get grounded answers — no SaaS, no database server, no API key.",
   "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "bin": {
     "quarry": "./dist/cli.js"
   },
@@ -11,6 +28,7 @@
   },
   "scripts": {
     "build": "tsc -p tsconfig.json",
+    "prepack": "pnpm build",
     "dev": "NODE_OPTIONS=--experimental-sqlite tsx src/cli.ts",
     "check": "tsc --noEmit -p tsconfig.json",
     "typecheck": "tsc --noEmit -p tsconfig.json",
@@ -25,7 +43,6 @@
     "@anthropic-ai/sdk": "^0.126.0",
     "@huggingface/transformers": "^3.8.1",
     "commander": "^12.1.0",
-    "moss": "link:../moss",
     "simple-git": "^3.27.0",
     "sqlite-vec": "^0.1.6"
   },
@@ -38,6 +55,15 @@
     "vite": "^8.3.0",
     "vitest": "^5.0.1"
   },
-  "license": "UNLICENSED",
-  "packageManager": "pnpm@11.5.2"
+  "license": "MIT",
+  "packageManager": "pnpm@11.5.2",
+  "author": "Karl Doyle",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/KarlDoyle/quarry.git"
+  },
+  "homepage": "https://github.com/KarlDoyle/quarry#readme",
+  "bugs": {
+    "url": "https://github.com/KarlDoyle/quarry/issues"
+  }
 }

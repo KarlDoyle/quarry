@@ -6,8 +6,10 @@ Quarry indexes a codebase locally, retrieves relevant source files and uses them
 
 It is designed for engineers who want to explore and understand a codebase without sending source code to a hosted embedding service or requiring a separate database server.
 
+Maintained by [Karl Doyle](https://github.com/KarlDoyle). Source: [github.com/KarlDoyle/quarry](https://github.com/KarlDoyle/quarry).
+
 ![local-first](https://img.shields.io/badge/local--first-yes-6ee7b7?style=flat-square)
-![licence](https://img.shields.io/badge/licence-UNLICENSED-slategray?style=flat-square)
+![licence](https://img.shields.io/badge/licence-MIT-6ee7b7?style=flat-square)
 
 ## How it works
 
@@ -43,7 +45,7 @@ See [the evaluation results and methodology](eval/RESULTS.md) for the full detai
 Run the evaluation with:
 
 ```bash
-pnpm eval ~/Dev/moss eval/moss-goldset.json
+pnpm eval /path/to/moss eval/moss-goldset.json
 ```
 
 ## Ticket analysis
@@ -62,6 +64,16 @@ This capability became the foundation for **Marshal**, a separate workflow that 
 - **Interface:** CLI and importable library surface.
 
 No database server or native compiler is required for the native runtime path. The first index run downloads the embedding model; subsequent indexing and retrieval can run locally. LLM analysis requires a configured local model or an optional hosted provider.
+
+## Package installation
+
+The package name is `@karldoyle/quarry`. It has not been published yet. After its first public release, install the CLI with:
+
+```bash
+npm install --global @karldoyle/quarry
+```
+
+Until then, use the source checkout below.
 
 ## Quick start
 
@@ -87,11 +99,7 @@ The first indexing run downloads the embedding model once. The default local pat
 
 ## Engineering approach
 
-Quarry was developed through an iterative process: starting with focused code-retrieval experiments, testing how useful the results were, measuring retrieval quality and evolving the strongest ideas into a reusable engine.
-
-AI-assisted development with Claude, alongside shared starter templates, prompts and engineering harnesses, has helped accelerate implementation and expand the testing and evaluation work. The important engineering decisions remain human-led: choosing the retrieval strategy, measuring it against a gold set, inspecting where it performs poorly and documenting the trade-offs rather than presenting the best-looking metric alone.
-
-The evaluation is intentionally candid: hybrid search improves some top-k results but does not outperform dense-only across all reported measures. That result informs the next experiments rather than being hidden.
+The retrieval evaluation records both the cases where hybrid search helps and the cases where dense-only search performs better. AI assistants helped with implementation and test development. I chose the retrieval design, reviewed the results and decided which trade-offs to keep.
 
 ## Development and quality
 
@@ -102,7 +110,7 @@ pnpm test
 pnpm coverage
 ```
 
-The repository's README previously recorded a 3 July 2026 verification of 4 test files / 11 tests and a 29 June 2026 coverage snapshot. Those are historical snapshots, not a claim about the current checkout. The recorded coverage was modest, with the CLI, config and provider edges less tested than the indexer and vector store. Consult the current CI run and coverage output for present status.
+GitHub Actions runs typecheck, lint, coverage-enforced tests and a build. It also installs the packed tarball in a clean consumer and checks the library exports and CLI. See the [latest workflow run](https://github.com/KarlDoyle/quarry/actions).
 
 ## Roadmap
 
@@ -116,4 +124,4 @@ The project deliberately avoids native tree-sitter grammars, agentic multi-step 
 
 ## Licence
 
-UNLICENSED — all rights reserved. Source-available for personal/portfolio review; no public open-source licence is included.
+Quarry is licensed under the MIT License. See [LICENSE](LICENSE).
