@@ -54,3 +54,16 @@ jobs:
       # 4. Build last — the most expensive step.
       - name: Build
         run: pnpm build
+
+      # Install the exact package tarball in an isolated consumer to catch
+      # missing exports, build output, or runtime dependencies before release.
+      - name: Verify packed package
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          tarball="$RUNNER_TEMP/mrkarldoyle-quarry-0.2.0.tgz"
+          test -f "$tarball"
+          mkdir -p "$RUNNER_TEMP/quarry-consumer"
+          npm install --prefix "$RUNNER_TEMP/quarry-consumer" "$tarball"
+          cd "$RUNNER_TEMP/quarry-consumer"
+          NODE_OPTIONS=--experimental-sqlite node --input-type=module -e 'const q = await import("@mrkarldoyle/quarry"); if (!q.RepositoryIndexer || !q.VectorStore) process.exit(1);'
+          ./node_modules/.bin/quarry --help

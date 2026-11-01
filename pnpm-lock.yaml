@@ -20,9 +20,6 @@ importers:
       commander:
         specifier: ^12.1.0
         version: 12.1.0
-      moss:
-        specifier: link:[private sibling link redacted]
-        version: link:[private sibling link redacted]
       simple-git:
         specifier: ^3.27.0
         version: 3.36.0
