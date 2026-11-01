@@ -12,7 +12,7 @@ Produced by `scripts/eval.ts` (`pnpm eval`) on the `moss` corpus — a real, cle
 TypeScript CLI codebase. Numbers are copied verbatim from the harness; they are
 deterministic run-to-run. Full detail and caveats live in `eval/RESULTS.md`.
 
-- **Corpus:** `moss` — latest re-verification: 293 files, 1,523 chunks. The original 233-file run produced the same recall@k and MRR 0.633.
+- **Corpus:** `moss` — latest re-verification: 293 files, 1,523 chunks. The original 233-file run produced the same recall@k but a hybrid MRR of 0.633; the 293-file re-verification measured 0.639 (2026-06-30). The table below uses the re-verified value.
 - **Embedder:** `Xenova/all-MiniLM-L6-v2` (384-dim, quantised, local/offline).
 - **Gold set:** `eval/moss-goldset.json` — 28 real developer questions, each
   mapped to the file(s) that truly answer it.
