@@ -67,13 +67,13 @@ No database server or native compiler is required for the native runtime path. T
 
 ## Package installation
 
-The package name is `@karldoyle/quarry`. Install the CLI globally with:
+The package name is `@mrkarldoyle/quarry`. Install the CLI globally with:
 
 ```bash
-npm install --global @karldoyle/quarry
+npm install --global @mrkarldoyle/quarry
 ```
 
-To use Quarry as a library in a project, install it as a dependency with `npm install @karldoyle/quarry`.
+To use Quarry as a library in a project, install it as a dependency with `npm install @mrkarldoyle/quarry`.
 
 ## Quick start
 
