@@ -24,7 +24,7 @@ program
   .description(
     "Local-first hybrid code search + grounded LLM analysis + ticket triage. No SaaS, no DB server, no key.",
   )
-  .version("0.2.0");
+  .version("0.2.1");
 
 function openStore(): VectorStore {
   const config = loadConfig();
