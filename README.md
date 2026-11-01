@@ -8,6 +8,8 @@ It is designed for engineers who want to explore and understand a codebase witho
 
 Maintained by [Karl Doyle](https://github.com/KarlDoyle). Source: [github.com/KarlDoyle/quarry](https://github.com/KarlDoyle/quarry).
 
+**Status:** Release-ready, as assessed by the maintainer. The source repository remains private. Evaluation caveats and provider data-handling details below are part of the release context.
+
 ![local-first](https://img.shields.io/badge/local--first-yes-6ee7b7?style=flat-square)
 ![licence](https://img.shields.io/badge/licence-MIT-6ee7b7?style=flat-square)
 
