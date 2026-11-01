@@ -27,16 +27,15 @@ Configs compared (see CONFIGS below)
 
 Gold set
 --------
-Same shape as eval/moss-goldset.json: {"queries": [{"query": ..,
+Same shape as eval/sample-goldset.json: {"queries": [{"query": ..,
 "expectedFiles": [substr, ...]}, ...]}. A query is a "hit@k" if any expected
 substring appears in the file path of any top-k retrieved chunk.
 
-- For REAL numbers: clone a real repo (e.g. moss) into the runtime, set
-  REPO_PATH to it, and set GOLDSET_PATH to an uploaded moss-goldset.json.
+- For representative measurements: use a repository and gold set you are
+  authorized to process, and set REPO_PATH and GOLDSET_PATH to those files.
 - For a zero-setup smoke run: leave both as None. The script writes a tiny
   built-in synthetic corpus + matching gold set so the rig runs out of the box
-  and the table renders. (Synthetic numbers are directional only — quote moss
-  numbers, not these.)
+  and the table renders. Synthetic numbers are not product performance data.
 
 This script only MEASURES. It never claims a number it did not just compute.
 """
@@ -71,8 +70,8 @@ RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
 
 # Point these at a real clone + uploaded gold set for real numbers.
 # Leave as None to use the built-in synthetic smoke corpus + gold set.
-REPO_PATH: str | None = None          # e.g. "/content/moss"
-GOLDSET_PATH: str | None = None        # e.g. "/content/moss-goldset.json"
+REPO_PATH: str | None = None          # e.g. "/content/your-repository"
+GOLDSET_PATH: str | None = None        # e.g. "/content/your-goldset.json"
 
 # Retrieval / rerank depth.
 RETRIEVE_K = 10                        # candidates pulled by dense retrieval
@@ -397,7 +396,7 @@ def main() -> None:
         corpus_name = gold.get("corpus", REPO_PATH)
     else:
         print("REPO_PATH/GOLDSET_PATH not set — using built-in synthetic smoke "
-              "corpus.\n(Quote moss numbers for anything real; see eval/COLAB.md.)")
+              "corpus.\n(These smoke-test numbers are not product results; see eval/COLAB.md.)")
         repo, gold = write_synthetic_corpus()
         corpus_name = gold.get("corpus", "synthetic")
 

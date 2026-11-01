@@ -25,27 +25,26 @@ The default analysis provider is local Ollama. The embedding model and LLM provi
 
 Semantic retrieval can find conceptually related code, while keyword retrieval can be useful for exact identifiers, symbols and error strings. Quarry combines both signals rather than relying on either alone.
 
-The retrieval evaluation is deliberately reported with its limitations.
+The bundled evaluation is a small smoke test for the evaluation harness, not
+evidence of representative retrieval quality. Use a corpus and gold set you
+have permission to process before making performance claims.
 
-### Measured retrieval results
+### Evaluation
 
-The committed evaluation uses a 28-query gold set against a 293-file code corpus. The latest recorded re-verification in the repository is dated **30 June 2026**.
+The checked-in three-query fixture uses `examples/sample-repo` and exists to
+exercise the harness. Its results are not representative and should not be
+quoted as product performance. The harness measures retrieval, not end-to-end
+LLM response quality or latency.
 
-| Mode | recall@1 | recall@3 | recall@5 | MRR | Search p50 |
-| --- | ---: | ---: | ---: | ---: | ---: |
-| **Hybrid** (dense + BM25 + RRF) | 42.9% | 82.1% | 85.7% | 0.639 | ~1.3 ms |
-| Dense-only (sqlite-vec) | 50.0% | 75.0% | 92.9% | 0.664 | ~0.5 ms |
-
-These results show a useful top-k retrieval stage: a relevant file appeared in the top three for about 82% of the evaluation queries with hybrid retrieval. They do **not** show that hybrid retrieval wins on every metric; dense-only performed better on recall@1, recall@5 and MRR in this run.
-
-This is a small, single-codebase evaluation. It measures retrieval quality and search latency, not end-to-end LLM response quality or latency. The benchmark is evidence for continued investigation, not a general performance claim.
-
-See [the evaluation results and methodology](eval/RESULTS.md) for the full detail and caveats.
+See [the evaluation methodology](docs/EVAL-AND-PRECISION.md) for guidance on
+measuring against a representative corpus.
 
 Run the evaluation with:
 
 ```bash
-pnpm eval /path/to/moss eval/moss-goldset.json
+pnpm eval
+# Or supply a corpus and a matching JSON gold set:
+pnpm eval /path/to/repository /path/to/goldset.json
 ```
 
 ## Ticket analysis

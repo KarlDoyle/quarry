@@ -20,11 +20,6 @@ name: seed-tier0-test
 
 on:
   workflow_dispatch:
-    inputs:
-      note:
-        description: "Optional note to include in the seed line"
-        required: false
-        default: ""
 
 permissions:
   contents: write
@@ -54,12 +49,7 @@ jobs:
         run: |
           mkdir -p reports
           TS="$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-          NOTE="${{ github.event.inputs.note }}"
-          if [ -n "$NOTE" ]; then
-            echo "- ${TS} — seed-tier0-test run ${{ github.run_id }} — ${NOTE}" >> reports/automerge-seed-test.md
-          else
-            echo "- ${TS} — seed-tier0-test run ${{ github.run_id }}" >> reports/automerge-seed-test.md
-          fi
+          printf '%s\n' "- ${TS} — seed-tier0-test run ${GITHUB_RUN_ID}" >> reports/automerge-seed-test.md
           git add reports/automerge-seed-test.md
 
       - name: Commit

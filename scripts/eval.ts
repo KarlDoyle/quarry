@@ -46,10 +46,12 @@ interface ModeMetrics {
 const RECALL_KS = [1, 3, 5] as const;
 const RETRIEVE_K = 10; // deep enough for an honest MRR
 
-const repoPath = process.argv[2] ?? "/Users/kdoyle/Dev/moss";
+const repoPath =
+  process.argv[2] ??
+  new URL("../examples/sample-repo", import.meta.url).pathname;
 const goldsetPath =
   process.argv[3] ??
-  new URL("../eval/moss-goldset.json", import.meta.url).pathname;
+  new URL("../eval/sample-goldset.json", import.meta.url).pathname;
 
 const envMode = process.env.EVAL_MODE as Mode | undefined;
 const modes: Mode[] = envMode ? [envMode] : ["hybrid", "dense"];

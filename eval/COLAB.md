@@ -36,18 +36,16 @@ The first run downloads the models and pip-installs `sentence-transformers`
 - **Out of the box** (no config), the script uses a tiny built-in **synthetic**
   corpus + gold set so the rig runs immediately and the table renders. Those
   numbers are directional only — don't quote them.
-- **For real numbers**, point it at a real repo + gold set. In a cell before
-  running:
-  ```bash
-  !git clone --depth 1 https://github.com/KarlDoyle/moss /content/moss
-  ```
-  upload `moss-goldset.json` (Files → Upload), then edit the CONFIG block at the
-  top of `precision_benchmark.py`:
+- **For representative measurements**, use a code repository and matching gold
+  set you are authorized to process. Upload both to the runtime, then edit the
+  CONFIG block at the top of `precision_benchmark.py`:
   ```python
-  REPO_PATH    = "/content/moss"
-  GOLDSET_PATH = "/content/moss-goldset.json"
+  REPO_PATH    = "/content/your-repository"
+  GOLDSET_PATH = "/content/your-goldset.json"
   ```
-  Re-run. The table now reflects the real moss corpus and our gold set.
+  Re-run. The table reflects only the corpus and gold set you supplied.
+  Do not upload private source or evaluation data to a hosted notebook without
+  permission.
 
 ## Option B — Kaggle Notebooks (alternative)
 

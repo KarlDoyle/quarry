@@ -4,9 +4,8 @@ import { describe, expect, it } from "vitest";
 
 /**
  * Generic secret scan — fails the build if anything credential-shaped has been
- * committed. Lifted from moss/tests/boundaries/secret-scan.test.ts and
- * generalised: the scan roots below are simply the dirs this repo commits, and
- * missing dirs are skipped, so this file drops into any repo unchanged.
+ * committed. The scan roots below are simply the dirs this repo commits, and
+ * missing dirs are skipped.
  *
  * Deliberately pattern-based (no entropy heuristics): cheap, deterministic, and
  * it catches the credential shapes that actually leak. `.env.example` files are
