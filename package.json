@@ -1,6 +1,6 @@
 {
   "name": "@mrkarldoyle/quarry",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Local-first semantic + keyword code search and ticket triage. Index any repo, ask questions or triage a Jira ticket, get grounded answers — no SaaS, no database server, no API key.",
   "type": "module",
   "main": "./dist/index.js",

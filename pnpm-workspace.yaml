@@ -8,6 +8,6 @@ allowBuilds:
   protobufjs: false
   sharp: true
 overrides:
-  # transformers v3 pins sharp ^0.34; 0.35.4 patches two high-severity advisories and
-  # quarry only ever uses the text path, so the image API change cannot reach it.
-  sharp: ">=0.35.4"
+  sharp: ">=0.35.5"
+  source-map-js: ">=1.2.2"
+  vite: ">=8.3.3"
