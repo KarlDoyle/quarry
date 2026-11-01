@@ -48,6 +48,7 @@ function toFtsQuery(query: string): string | null {
 export class VectorStore {
   private db: DatabaseSyncType;
   private dim: number;
+  private replacementOpen = false;
   private static readonly RRF_K = 60;
 
   constructor(dbFilePath: string, dim: number = EMBEDDING_DIM) {
@@ -91,6 +92,32 @@ export class VectorStore {
     this.db.exec("DELETE FROM fts_chunks");
   }
 
+  /** Start an atomic full-index replacement; rollback restores the previous index. */
+  beginReplacement(): void {
+    if (this.replacementOpen)
+      throw new Error("An index replacement is already open.");
+    this.db.exec("BEGIN IMMEDIATE");
+    this.replacementOpen = true;
+    try {
+      this.clear();
+    } catch (error) {
+      this.rollbackReplacement();
+      throw error;
+    }
+  }
+
+  commitReplacement(): void {
+    if (!this.replacementOpen) throw new Error("No index replacement is open.");
+    this.db.exec("COMMIT");
+    this.replacementOpen = false;
+  }
+
+  rollbackReplacement(): void {
+    if (!this.replacementOpen) return;
+    this.db.exec("ROLLBACK");
+    this.replacementOpen = false;
+  }
+
   insert(chunk: Omit<CodeChunk, "similarity">): void {
     if (chunk.embedding.length !== this.dim) {
       throw new Error(
@@ -122,12 +149,13 @@ export class VectorStore {
   }
 
   insertMany(chunks: Array<Omit<CodeChunk, "similarity">>): void {
-    this.db.exec("BEGIN");
+    const ownsTransaction = !this.replacementOpen;
+    if (ownsTransaction) this.db.exec("BEGIN");
     try {
       for (const c of chunks) this.insert(c);
-      this.db.exec("COMMIT");
+      if (ownsTransaction) this.db.exec("COMMIT");
     } catch (error) {
-      this.db.exec("ROLLBACK");
+      if (ownsTransaction) this.db.exec("ROLLBACK");
       throw error;
     }
   }

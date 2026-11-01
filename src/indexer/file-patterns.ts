@@ -242,6 +242,10 @@ export function shouldIndexFile(filename: string): boolean {
     // Check against skip patterns
     const shouldSkip =
       FILE_PATTERNS.skipFiles.includes(filename) ||
+      /(^|[._-])(secret|secrets|credential|credentials|private[-_]?key|access[-_]?token)([._-]|$)/i.test(
+        filename,
+      ) ||
+      /^\.env(?:\.|$)/i.test(filename) ||
       FILE_PATTERNS.skipPatterns.some((pattern) => pattern.test(filename));
     return !shouldSkip;
   }

@@ -50,9 +50,15 @@ export class JiraClient {
   ) {}
 
   async getIssue(key: string): Promise<Ticket> {
+    const endpoint = new URL(this.baseUrl);
+    if (endpoint.protocol !== "https:") {
+      throw new Error(
+        "JIRA_BASE_URL must use HTTPS to protect Jira credentials.",
+      );
+    }
     const auth = Buffer.from(`${this.email}:${this.token}`).toString("base64");
     const raw = await fetchJson(
-      `${this.baseUrl.replace(/\/$/, "")}/rest/api/3/issue/${encodeURIComponent(key)}`,
+      `${endpoint.toString().replace(/\/$/, "")}/rest/api/3/issue/${encodeURIComponent(key)}`,
       {
         headers: { Authorization: `Basic ${auth}`, Accept: "application/json" },
       },

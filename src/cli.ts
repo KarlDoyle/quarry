@@ -113,17 +113,17 @@ function buildProvider(config: Config): LLMProvider {
     return new AnthropicProvider(config.model, config.anthropicApiKey);
   }
   const ollama = new OllamaProvider(config.model, config.ollamaHost);
-  // If an Anthropic key is configured, use it as an automatic fallback for when
-  // Ollama isn't running. Local stays primary (free); the key is opt-in safety.
-  const localPath: LLMProvider = config.anthropicApiKey
-    ? new FallbackProvider(
-        ollama,
-        new AnthropicProvider(
-          "claude-haiku-4-5-20251001",
-          config.anthropicApiKey,
-        ),
-      )
-    : ollama;
+  // A key alone never enables hosted inference: prompts can contain proprietary code.
+  const localPath: LLMProvider =
+    config.anthropicApiKey && config.anthropicFallback
+      ? new FallbackProvider(
+          ollama,
+          new AnthropicProvider(
+            "claude-haiku-4-5-20251001",
+            config.anthropicApiKey,
+          ),
+        )
+      : ollama;
   // QUARRY_LLM=moss: route generation through moss's local-first router. If moss
   // is unavailable (not linked) or has no available local lane, FallbackProvider
   // transparently drops back to the direct Ollama path so Quarry still works.
