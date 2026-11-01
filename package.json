@@ -1,6 +1,6 @@
 {
   "name": "@mrkarldoyle/quarry",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Local-first semantic + keyword code search and ticket triage. Index any repo, ask questions or triage a Jira ticket, get grounded answers — no SaaS, no database server, no API key.",
   "type": "module",
   "main": "./dist/index.js",
@@ -43,7 +43,7 @@
     "@anthropic-ai/sdk": "^0.126.0",
     "@huggingface/transformers": "^3.8.1",
     "commander": "^12.1.0",
-    "simple-git": "^3.27.0",
+    "simple-git": "^4.0.2",
     "sqlite-vec": "^0.1.6"
   },
   "devDependencies": {
