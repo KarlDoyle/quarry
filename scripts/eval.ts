@@ -46,7 +46,9 @@ interface ModeMetrics {
 const RECALL_KS = [1, 3, 5] as const;
 const RETRIEVE_K = 10; // deep enough for an honest MRR
 
-const repoPath = process.argv[2] ?? "[local path redacted]";
+const repoPath =
+  process.argv[2] ??
+  new URL("../examples/sample-repo", import.meta.url).pathname;
 const goldsetPath =
   process.argv[3] ??
   new URL("../eval/sample-goldset.json", import.meta.url).pathname;

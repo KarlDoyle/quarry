@@ -1,0 +1,18 @@
+{
+  "corpus": "quarry-sample-repo",
+  "description": "Small public demonstration corpus. These queries verify that the evaluation harness can find relevant files; they are not representative product benchmarks.",
+  "queries": [
+    {
+      "query": "How does the sample authenticate a user and validate credentials?",
+      "expectedFiles": ["auth.ts"]
+    },
+    {
+      "query": "Where is the shopping cart total calculated, including item prices and quantities?",
+      "expectedFiles": ["cart.js"]
+    },
+    {
+      "query": "How does the retry helper use exponential backoff between attempts?",
+      "expectedFiles": ["retry.py"]
+    }
+  ]
+}

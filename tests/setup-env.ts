@@ -6,8 +6,8 @@
 // and write that repository instead of the temp fixture it was aimed at. Strip them, so a
 // hook-run suite behaves exactly like a terminal-run one.
 //
-// This is not hypothetical: the same gap corrupted a local checkout on 2026-09-19, when a
-// fixture `git init` under a pre-push hook landed on the real HEAD.
+// This prevents fixture git commands from accidentally targeting the checkout
+// that invoked the test suite.
 for (const key of [
   "GIT_DIR",
   "GIT_WORK_TREE",

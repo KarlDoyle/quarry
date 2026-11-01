@@ -81,12 +81,9 @@ export class OllamaProvider implements LLMProvider {
 }
 
 /**
- * The slice of moss's public library surface that Quarry consumes. Declared
- * locally (rather than importing moss's types) so Quarry's `tsc` never has to
- * resolve moss's source: moss ships raw TypeScript with `.ts`-extension imports
- * and no build step, which Quarry's compiler cannot type-check. We bind to it
- * only at runtime via a dynamic import. Keep this in sync with the real surface
- * in `[local path redacted]/src/index.ts` (`routeAndGenerate`).
+ * The optional local router interface used by MossProvider. It is declared
+ * locally so Quarry can compile without requiring the router package at build
+ * time; the provider resolves it only when selected at runtime.
  */
 interface MossLibrary {
   routeAndGenerate(
