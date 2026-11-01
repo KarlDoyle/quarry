@@ -10,6 +10,9 @@ export default defineConfig({
     // under .claude/worktrees is discovered too and every test runs twice.
     include: ["tests/**/*.test.ts"],
     pool: "forks",
+    // Multiple test files initialize the same cached Hugging Face ONNX model.
+    // Running workers in parallel can observe a partially written model file.
+    fileParallelism: false,
     // Vitest 4 flattened `poolOptions.forks.*` to top level.
     execArgv: ["--experimental-sqlite"],
     setupFiles: ["tests/setup-env.ts"],

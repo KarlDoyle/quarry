@@ -30,6 +30,8 @@ export interface Config {
   ollamaHost: string;
   /** Anthropic key — only read when provider=anthropic. */
   anthropicApiKey: string | undefined;
+  /** Permit sending prompts to Anthropic if local Ollama fails. */
+  anthropicFallback: boolean;
 }
 
 export function loadConfig(): Config {
@@ -53,6 +55,7 @@ export function loadConfig(): Config {
     model: process.env.QUARRY_MODEL ?? defaultModel,
     ollamaHost: process.env.OLLAMA_HOST ?? "http://127.0.0.1:11434",
     anthropicApiKey: process.env.ANTHROPIC_API_KEY,
+    anthropicFallback: process.env.QUARRY_ANTHROPIC_FALLBACK === "true",
   };
 }
 

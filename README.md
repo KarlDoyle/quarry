@@ -19,7 +19,7 @@ Maintained by [Karl Doyle](https://github.com/KarlDoyle). Source: [github.com/Ka
 4. **Retrieve:** combine dense vector search and BM25 keyword search using Reciprocal Rank Fusion.
 5. **Analyse:** send retrieved context to a local LLM and produce an answer grounded in the source, with file citations.
 
-The default analysis provider is local Ollama. The embedding model and LLM provider can be changed; an Anthropic provider is available as an optional fallback.
+The default analysis provider is local Ollama. Anthropic is available when selected explicitly, or as an explicitly enabled fallback. A configured Anthropic key alone never enables hosted inference.
 
 ## Why hybrid retrieval?
 
@@ -62,7 +62,7 @@ This capability became the foundation for **Marshal**, a separate workflow that 
 - **LLM:** local Ollama by default; optional Anthropic provider.
 - **Interface:** CLI and importable library surface.
 
-No database server or native compiler is required for the native runtime path. The first index run downloads the embedding model; subsequent indexing and retrieval can run locally. LLM analysis requires a configured local model or an optional hosted provider.
+No database server or native compiler is required for the native runtime path. The first index run downloads the embedding model from Hugging Face; subsequent indexing and retrieval can run locally. Local Ollama analysis sends prompts to the configured Ollama endpoint (localhost by default). Selecting Anthropic, or enabling hosted fallback, sends the query, ticket details, and retrieved source context to Anthropic. Setting `OLLAMA_HOST` to a remote server also sends that context to the configured server.
 
 ## Package installation
 
@@ -93,6 +93,10 @@ For `analyze` and `analyze-ticket`, start Ollama and pull a model such as `llama
 ollama serve
 ollama pull llama3.1
 ```
+
+Hosted Anthropic use is explicit. Set `QUARRY_PROVIDER=anthropic` and
+`ANTHROPIC_API_KEY` to select it, or also set `QUARRY_ANTHROPIC_FALLBACK=true`
+to permit fallback if local Ollama fails.
 
 The first indexing run downloads the embedding model once. The default local path does not require an API key.
 
