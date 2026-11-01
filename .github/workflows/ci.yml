@@ -60,7 +60,7 @@ jobs:
       - name: Verify packed package
         run: |
           npm pack --pack-destination "$RUNNER_TEMP"
-          tarball="$RUNNER_TEMP/mrkarldoyle-quarry-0.2.0.tgz"
+          tarball="$RUNNER_TEMP/mrkarldoyle-quarry-0.2.1.tgz"
           test -f "$tarball"
           mkdir -p "$RUNNER_TEMP/quarry-consumer"
           npm install --prefix "$RUNNER_TEMP/quarry-consumer" "$tarball"
