@@ -130,7 +130,7 @@ export class MossProvider implements LLMProvider {
       moss = (await import(specifier)) as unknown as MossLibrary;
     } catch (error) {
       throw new Error(
-        `moss library is not available (QUARRY_LLM=moss). Is it linked? (pnpm add link:../moss). Cause: ${
+        `moss integration is unavailable (QUARRY_LLM=moss). Install Moss separately and ensure it is resolvable from Quarry. Cause: ${
           error instanceof Error ? error.message : String(error)
         }`,
       );
