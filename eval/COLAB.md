@@ -34,8 +34,12 @@ The first run downloads the models and pip-installs `sentence-transformers`
 ### Smoke run vs real numbers
 
 - **Out of the box** (no config), the script uses a tiny built-in **synthetic**
-  corpus + gold set so the rig runs immediately and the table renders. Those
-  numbers are directional only — don't quote them.
+  corpus + gold set and the baseline model so the rig runs immediately and the
+  table renders. Those numbers are directional only — don't quote them.
+- The code-specific model is off by default because loading it can execute Python
+  from its model repository. To include it, review that code, set `RUN_CODE = True`,
+  and set `CODE_MODEL_REVISION` to the reviewed model commit's full 40-character
+  SHA. The script enables remote code only for that pinned model revision.
 - **For representative measurements**, use a code repository and matching gold
   set you are authorized to process. Upload both to the runtime, then edit the
   CONFIG block at the top of `precision_benchmark.py`:

@@ -106,6 +106,11 @@ on an **ephemeral** runtime. It indexes a code dir, retrieves, optionally rerank
 and prints a recall@1/@3/@5 + MRR comparison table across configs. Step-by-step
 instructions: `eval/COLAB.md`.
 
+The code-specific model is disabled by default because loading it can execute
+Python from its model repository. Enable it only after reviewing that code and
+pinning `CODE_MODEL_REVISION` to its full commit SHA, as described in
+`eval/COLAB.md`.
+
 The benchmark reuses the gold-set shape of `eval/moss-goldset.json`. Point it at a
 cloned `moss` + the uploaded gold set for real numbers; leave it unconfigured for
 a zero-setup smoke run against a tiny built-in synthetic corpus (directional only).
