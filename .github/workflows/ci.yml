@@ -65,5 +65,5 @@ jobs:
           mkdir -p "$RUNNER_TEMP/quarry-consumer"
           npm install --prefix "$RUNNER_TEMP/quarry-consumer" "$tarball"
           cd "$RUNNER_TEMP/quarry-consumer"
-          NODE_OPTIONS=--experimental-sqlite node --input-type=module -e 'const q = await import("@karldoyle/quarry"); if (!q.RepositoryIndexer || !q.VectorStore) process.exit(1);'
+          NODE_OPTIONS=--experimental-sqlite node --input-type=module -e 'const q = await import("@mrkarldoyle/quarry"); if (!q.RepositoryIndexer || !q.VectorStore) process.exit(1);'
           ./node_modules/.bin/quarry --help
