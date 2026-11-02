@@ -43,6 +43,7 @@ This script only MEASURES. It never claims a number it did not just compute.
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 import sys
 import tempfile
@@ -62,6 +63,9 @@ BASELINE_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 # Embedding-Code, Voyage-code) are gated or paid and are a server/GPU tier,
 # not a laptop tier — left out on purpose. Swap CODE_MODEL freely.
 CODE_MODEL = "jinaai/jina-embeddings-v2-base-code"
+# Required if RUN_CODE is enabled. Use the model repository's immutable commit
+# SHA after reviewing its remote Python code.
+CODE_MODEL_REVISION: str | None = None
 
 # Cross-encoder reranker. bge-reranker-v2-m3 is 568M and CPU-runnable; it is
 # the "10x multiplier" lever — it re-scores the top candidates jointly with the
@@ -78,9 +82,9 @@ RETRIEVE_K = 10                        # candidates pulled by dense retrieval
 RERANK_CANDIDATES = 10                 # how many of those the reranker re-scores
 RECALL_KS = (1, 3, 5)                  # report recall at these cut-offs
 
-# Which configs to run. Set RUN_CODE=False to skip the (large) code model, or
-# RUN_RERANK=False to skip the reranker, e.g. for a quick baseline-only pass.
-RUN_CODE = True
+# The code model requires trusted remote Python. Keep it opt-in; when enabled,
+# pin CODE_MODEL_REVISION to a reviewed immutable commit SHA.
+RUN_CODE = False
 RUN_RERANK = True
 
 # Files to index. Mirrors a code corpus; extend as needed.
@@ -342,12 +346,16 @@ def score(ranked_idx_per_query, paths, gold_queries):
 # ---------------------------------------------------------------------------
 
 def run_config(name, embed_model_name, texts, paths, queries, gold_queries,
-               reranker=None):
+               reranker=None, revision=None, trust_remote_code=False):
     from sentence_transformers import SentenceTransformer
 
     print(f"\n=== config: {name} (embed={embed_model_name}"
           f"{', rerank=' + RERANKER_MODEL if reranker else ''}) ===", flush=True)
-    model = SentenceTransformer(embed_model_name, trust_remote_code=True)
+    model = SentenceTransformer(
+        embed_model_name,
+        revision=revision,
+        trust_remote_code=trust_remote_code,
+    )
     corpus_emb = embed_corpus(model, texts)
     ranked = retrieve(model, corpus_emb, queries, RETRIEVE_K)
 
@@ -386,6 +394,12 @@ def print_table(rows, meta):
 
 
 def main() -> None:
+    if RUN_CODE and not re.fullmatch(r"[0-9a-f]{40}", CODE_MODEL_REVISION or ""):
+        raise SystemExit(
+            "RUN_CODE requires CODE_MODEL_REVISION to be a reviewed, "
+            "40-character model commit SHA."
+        )
+
     _ensure_deps()
     from sentence_transformers import CrossEncoder
 
@@ -421,10 +435,14 @@ def main() -> None:
                                queries, gold_queries, reranker=reranker))
     if RUN_CODE:
         rows.append(run_config("code", CODE_MODEL, texts, paths,
-                               queries, gold_queries))
+                               queries, gold_queries,
+                               revision=CODE_MODEL_REVISION,
+                               trust_remote_code=True))
         if RUN_RERANK:
             rows.append(run_config("code+rerank", CODE_MODEL, texts, paths,
-                                   queries, gold_queries, reranker=reranker))
+                                   queries, gold_queries, reranker=reranker,
+                                   revision=CODE_MODEL_REVISION,
+                                   trust_remote_code=True))
 
     meta = {
         "corpus": corpus_name,

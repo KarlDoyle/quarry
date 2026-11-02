@@ -8,8 +8,29 @@ It is designed for engineers who want to explore and understand a codebase witho
 
 Maintained by [Karl Doyle](https://github.com/KarlDoyle). Source: [github.com/KarlDoyle/quarry](https://github.com/KarlDoyle/quarry).
 
+**Status:** Release-ready, as assessed by the maintainer. The source repository remains private. Evaluation caveats and provider data-handling details below are part of the release context.
+
 ![local-first](https://img.shields.io/badge/local--first-yes-6ee7b7?style=flat-square)
 ![licence](https://img.shields.io/badge/licence-MIT-6ee7b7?style=flat-square)
+
+## Architecture at a glance
+
+```mermaid
+flowchart TD
+    A["Source repository"] --> B["Language-aware parsing and chunking"]
+    B --> C["Local embeddings (Transformers.js)"]
+    C --> D["SQLite + sqlite-vec"]
+    B --> E["SQLite FTS5 (BM25)"]
+    Q["Code question or ticket"] --> F["Hybrid retrieval"]
+    D --> F
+    E --> F
+    F --> G["Reciprocal Rank Fusion"]
+    G --> H["Retrieved code and file evidence"]
+    H --> I["Grounded analysis: local Ollama by default"]
+    I --> J["Answer with file citations"]
+```
+
+The local-first default keeps indexing and retrieval on the developer's machine. An explicitly selected Anthropic provider or remote Ollama endpoint changes where retrieved context is sent; see [Technical design](#technical-design).
 
 ## How it works
 
@@ -51,7 +72,7 @@ pnpm eval /path/to/repository /path/to/goldset.json
 
 Quarry also exposes an `analyze-ticket` path that can ingest a Jira issue and analyse it against an indexed repository. It retrieves likely relevant code and asks the model to identify an approach, likely affected files and risks.
 
-This capability became the foundation for **Marshal**, a separate workflow that extends the retrieval engine with multi-repository routing, CODEOWNERS-based ownership evidence and structured ticket rewriting.
+This capability became the foundation for **Marshal**, a separate MVP workflow that reuses Quarry's retrieval engine for multi-repository routing, CODEOWNERS-based ownership evidence and structured ticket refinement. Separating retrieval from ticket workflow lets each component evolve and be tested independently; Marshal is a technical spike, not a complete Jira product.
 
 ## Technical design
 
