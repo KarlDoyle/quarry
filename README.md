@@ -36,8 +36,8 @@ exercise the harness. Its results are not representative and should not be
 quoted as product performance. The harness measures retrieval, not end-to-end
 LLM response quality or latency.
 
-See [the evaluation methodology](docs/EVAL-AND-PRECISION.md) for guidance on
-measuring against a representative corpus.
+See [the evaluation methodology](docs/EVAL-AND-PRECISION.md) and [the latest
+Moss run](eval/RESULTS.md) for the current measurements and their limits.
 
 Run the evaluation with:
 
@@ -61,6 +61,8 @@ This capability became the foundation for **Marshal**, a separate workflow that 
 - **Retrieval:** dense vector search + BM25 keyword search, fused with Reciprocal Rank Fusion.
 - **LLM:** local Ollama by default; optional Anthropic provider.
 - **Interface:** CLI and importable library surface.
+
+The [architecture note](docs/architecture.md) traces the indexing and answer path. [Retrieval design and evidence](docs/retrieval-design.md) describes the tests and the current limits of the evaluation artefacts.
 
 No database server or native compiler is required for the native runtime path. The first index run downloads the embedding model from Hugging Face; subsequent indexing and retrieval can run locally. Local Ollama analysis sends prompts to the configured Ollama endpoint (localhost by default). Selecting Anthropic, or enabling hosted fallback, sends the query, ticket details, and retrieved source context to Anthropic. Setting `OLLAMA_HOST` to a remote server also sends that context to the configured server.
 

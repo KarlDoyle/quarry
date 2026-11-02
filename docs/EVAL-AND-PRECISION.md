@@ -1,5 +1,7 @@
 # Evaluation and precision — how we measure, and what we expect
 
+> **Current result:** Quarry was evaluated on `moss@731ab74` on 2 November 2026 with the 28-query `eval/moss-goldset.json`. The default harness without arguments still uses the three-query smoke set. Full current results and limits are in `eval/RESULTS.md`.
+
 This is the durable reference for retrieval quality in Quarry:
 the numbers we have actually measured, the levers that improve precision (ranked,
 with honest expected gains and sources), the tiered architecture that keeps the
@@ -8,31 +10,31 @@ no inflation. The standing rule: **always measure before claiming**.
 
 ## 1. Measured baseline (what we can prove today)
 
-Produced by `scripts/eval.ts` (`pnpm eval`) on the `moss` corpus — a real, clean
-TypeScript CLI codebase. Numbers are copied verbatim from the harness; they are
-deterministic run-to-run. Full detail and caveats live in `eval/RESULTS.md`.
+Produced by `scripts/eval.ts` (`pnpm eval ../moss eval/moss-goldset.json`) on the
+Moss checkout named in the run. Retrieval metrics are deterministic for a fixed
+corpus, model and gold set; measured latency varies by machine. Full detail and
+caveats live in `eval/RESULTS.md`.
 
-- **Corpus:** `moss` — latest re-verification: 293 files, 1,523 chunks. The original 233-file run produced the same recall@k and MRR 0.633.
+- **Corpus:** `moss@731ab74` — 223 files, 2,268 chunks.
 - **Embedder:** `Xenova/all-MiniLM-L6-v2` (384-dim, quantised, local/offline).
-- **Gold set:** `eval/moss-goldset.json` — 28 real developer questions, each
-  mapped to the file(s) that truly answer it.
+- **Gold set:** `eval/moss-goldset.json` — 28 hand-authored developer questions
+  mapped to expected source paths.
 
-| Mode | recall@1 | recall@3 | recall@5 | MRR |
-|---|---|---|---|---|
-| hybrid (dense + BM25 + RRF) | 42.9% | 82.1% | 85.7% | 0.639 |
-| dense-only (sqlite-vec) | 50.0% | 75.0% | 92.9% | 0.664 |
+| Mode | recall@1 | recall@3 | recall@5 | MRR | search p50 | search p95 |
+|---|---:|---:|---:|---:|---:|---:|
+| hybrid (dense + BM25 + RRF) | 46.4% | 67.9% | 82.1% | 0.600 | 1.48 ms | 2.10 ms |
+| dense-only (sqlite-vec) | 53.6% | 71.4% | 89.3% | 0.667 | 0.63 ms | 0.65 ms |
 
-Read honestly: the core is a **strong top-k (k≈3–5) retrieval stage to feed an
-LLM** — a relevant file lands in the top 5 for ~86–93% of realistic questions —
-but it is **not** a precise "jump to the one file" engine (~43–50% recall@1).
-Retrieval is sub-2 ms either way, so the dense-vs-hybrid choice is a quality
-trade-off, not a latency one. On this small single-language corpus hybrid does
-not clearly beat dense; BM25's value typically grows with corpus size and with
-exact-identifier queries.
+On this run dense-only retrieved an expected file in the top 1 for 15 of 28
+questions, compared with 13 for hybrid. At top 3 the counts were 20 and 19; at
+top 5 they were 25 and 23. Dense-only also had higher MRR and lower measured
+search latency on this corpus. These are small differences on one 28-question
+set, so they do not establish that dense-only is generally better. The harness
+measures retrieval, not the quality of generated answers.
 
 ## 2. The precision recipe (ranked levers)
 
-Where to spend effort to lift recall@1 from ~50% towards ~85%+, best ROI first.
+Where to spend effort to lift recall@1, best ROI first.
 Expected gains are indicative ranges from the literature and vendor reports, not
 promises — each must be **benchmarked on our gold set** before we quote it.
 
@@ -56,10 +58,10 @@ promises — each must be **benchmarked on our gold set** before we quote it.
    - <https://huggingface.co/BAAI/bge-reranker-v2-m3>
    - <https://www.pinecone.io/learn/series/rag/rerankers/>
 
-3. **Hybrid retrieval (dense + BM25 + RRF)** — *we already have this.* Keeps
-   exact identifiers and fuzzy intent both ranking well. Its benefit grows with
-   corpus size and exact-symbol queries; on the small moss corpus it is roughly
-   a wash (see §1). Keep it; re-measure on larger/polyglot corpora.
+3. **Hybrid retrieval (dense + BM25 + RRF)** — *already in core.* In the current
+   Moss run, dense-only scored higher on recall@1/3/5 and MRR. Test other
+   repositories and exact-identifier queries before drawing a broader conclusion
+   or changing the default.
 
 4. **AST-aware chunking** — *expected ~+3–8% recall.* Chunk on syntactic
    boundaries (functions, classes) rather than fixed character windows, so a
@@ -106,14 +108,19 @@ on an **ephemeral** runtime. It indexes a code dir, retrieves, optionally rerank
 and prints a recall@1/@3/@5 + MRR comparison table across configs. Step-by-step
 instructions: `eval/COLAB.md`.
 
+The code-specific model is disabled by default because loading it can execute
+Python from its model repository. Enable it only after reviewing that code and
+pinning `CODE_MODEL_REVISION` to its full commit SHA, as described in
+`eval/COLAB.md`.
+
 The benchmark reuses the gold-set shape of `eval/moss-goldset.json`. Point it at a
 cloned `moss` + the uploaded gold set for real numbers; leave it unconfigured for
 a zero-setup smoke run against a tiny built-in synthetic corpus (directional only).
 
 ## 5. Standing metrics and expectations
 
-- **Core is proven and runs anywhere.** The §1 numbers are real, deterministic,
-  and reproducible with `pnpm eval`. Quote them freely.
+- **Core has a measured baseline.** The §1 numbers are reproducible for the
+  stated corpus, gold set and model. Give those conditions with any result.
 - **Precision is benchmarked, not claimed.** No precision-tier number goes into
   the README or docs until it has been measured by `eval/precision_benchmark.py`
   on our gold set and the table recorded.
