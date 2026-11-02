@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1020" height="522" viewBox="0 0 1020 522" role="img" aria-labelledby="title desc">
+<title id="title">Quarry local cited-answer demo</title>
+<desc id="desc">Actual local Qwen CLI answer explaining the sample cart calculation, citing src/cart.js, with the full retrieved source list.</desc>
+<rect width="1020" height="522" rx="12" fill="#131b27"/>
+<text x="28" y="35" fill="#aabbd0" font-family="monospace" font-size="14">Quarry · bundled sample · 2 November 2026 · rendered CLI transcript</text>
+<text x="28" y="77" fill="#93e4be" font-family="monospace" font-size="17" xml:space="preserve">$ pnpm dev -- analyze &quot;how is the cart total calculated?&quot;</text>
+<text x="28" y="100" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">Local provider: Ollama | model: qwen2.5-coder:7b</text>
+<text x="28" y="123" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve"></text>
+<text x="28" y="146" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">The cart total is calculated in the `calculateCartTotal` function located in</text>
+<text x="28" y="169" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">`src/cart.js`. This function takes an array of items, a discount rate, and a tax rate</text>
+<text x="28" y="192" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">as parameters. It calculates the subtotal by summing up the product of the price and</text>
+<text x="28" y="215" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">quantity for each item. It then applies the discount rate to the subtotal and finally</text>
+<text x="28" y="238" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">adds the tax rate to the discounted amount to get the final total.</text>
+<text x="28" y="261" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve"></text>
+<text x="28" y="284" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">The function is exported and can be used elsewhere in the application to calculate the</text>
+<text x="28" y="307" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">total cost of items in a shopping cart after applying any discounts and taxes.</text>
+<text x="28" y="330" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve"></text>
+<text x="28" y="353" fill="#93e4be" font-family="monospace" font-size="17" xml:space="preserve">Sources:</text>
+<text x="28" y="376" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">  [0.544] src/cart.js</text>
+<text x="28" y="399" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">  [0.029] src/retry.py</text>
+<text x="28" y="422" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">  [0.006] src/auth.ts</text>
+<text x="28" y="445" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve"></text>
+<text x="28" y="468" fill="#e6edf5" font-family="monospace" font-size="17" xml:space="preserve">(via ollama: qwen2.5-coder:7b)</text>
+</svg>

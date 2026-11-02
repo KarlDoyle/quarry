@@ -21,3 +21,25 @@ The harness measures retrieval, not generated-answer quality, citations under mo
 ## Limits to report
 
 The bundled smoke set is too small to support general retrieval-quality claims. A single corpus and author-labelled expected paths do not establish performance across languages or projects. Model-generated answer quality remains separate from retrieval recall and needs its own evaluation.
+
+## Decision records
+
+These records describe the current implementation and its trade-offs, rather than asserting a historical decision process.
+
+### Local embeddings and embedded SQLite
+
+**Decision:** keep embeddings on-device and vectors, chunks and FTS5 data in one SQLite store, without a database server in the default path.
+
+**Trade-off:** first use downloads model weights; local model inference and indexing consume host resources. Hosted analysis remains an explicit choice. Revisit storage only if measured corpus requirements justify the operational cost.
+
+### Hybrid retrieval with a dense-only comparison
+
+**Decision:** retain dense + BM25 retrieval fused with RRF as the existing default; keep dense-only as the evaluation comparison.
+
+**Trade-off:** keyword matches can surface exact terms but can also change rankings unfavourably. The recorded Moss run favours dense-only on its labels; that does not establish a general winner. Revisit the default only after controlled comparisons on representative permitted corpora. See [Evaluation](EVALUATION.md) for metric semantics.
+
+### Retrieved context and source citations
+
+**Decision:** pass retrieved code as untrusted data to a provider instructed to use only that context, acknowledge insufficient evidence and cite source paths. Keep the retrieved source list available for inspection.
+
+**Trade-off:** prompt instructions and a source list do not guarantee grounded answers or prevent prompt injection. Source-position tests establish metadata behaviour, not model citation faithfulness. Review real answers against their cited code before presenting them as examples.
