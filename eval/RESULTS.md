@@ -1,75 +1,52 @@
-# Retrieval quality — Quarry v0.2
+# Quarry retrieval evaluation
 
-Real measurement of hybrid (dense + BM25, fused with RRF) vs dense-only retrieval,
-produced by `scripts/eval.ts` (`pnpm eval`). No inflation: numbers are copied
-verbatim from the harness output and are deterministic across runs.
+## Current run
 
-## Setup
+Run on 2 November 2026 with `pnpm eval ../moss eval/moss-goldset.json`.
 
-| | |
+| | Value |
 |---|---|
-| Tool | `quarry` v0.2 (`feat/v0.2`), hybrid retrieval: sqlite-vec KNN + FTS5 BM25, RRF (k=60) |
-| Corpus | `moss` — real, clean TypeScript CLI codebase |
-| Embedding model | `Xenova/all-MiniLM-L6-v2` (384-dim, quantized, local/offline) |
-| LLM | none — retrieval only; no Ollama, no API, no network |
-| Gold set | `eval/moss-goldset.json` — **28 queries**, each mapped to the file(s) that truly answer it |
-| Date | 2026-06-29 |
+| Corpus | Moss at commit `731ab74` |
+| Source files indexed | 223 |
+| Chunks indexed | 2,268 |
+| Gold set | 28 questions, `eval/moss-goldset.json` |
+| Embedding model | `Xenova/all-MiniLM-L6-v2` |
+| Index size | 16.03 MB |
+| Index time | 25.1 seconds |
+| LLM used | None; this run measures retrieval only |
 
-### Corpus indexed
+| Mode | recall@1 | recall@3 | recall@5 | MRR | search p50 | search p95 |
+|---|---:|---:|---:|---:|---:|---:|
+| Hybrid (dense + BM25 + RRF) | 46.4% | 67.9% | 82.1% | 0.600 | 1.48 ms | 2.10 ms |
+| Dense-only | 53.6% | 71.4% | 89.3% | 0.667 | 0.63 ms | 0.65 ms |
 
-| Metric | Value |
-|---|---|
-| Files indexed | 233 |
-| Chunks indexed | 1,459 |
-| Index size on disk | 10.76 MB (`index.db` + WAL/SHM) |
-| One-time index + model load | ~36 s |
+In this run, dense-only returned an expected file in the top 1 for 15 of 28 questions; hybrid did so for 13. At top 3 the counts were 20 and 19; at top 5 they were 25 and 23. Dense-only had higher MRR and lower search latency on this corpus.
 
-## Results
+The differences represent one or two questions at each recall cutoff. This single corpus and small, author-written gold set do not establish that dense-only is generally better. The results do show that adding BM25 did not improve this Moss run. Keep the production default unchanged until the comparison is repeated on other corpora, including exact-identifier questions.
 
-`recall@k` = fraction of the 28 queries with a relevant file in the top *k*
-retrieved chunks. `MRR` = mean reciprocal rank of the first relevant file over
-the top 10. Latency is `VectorStore.search()` wall time per query (SQLite
-retrieval + RRF only; one-time index/model-load and per-query embedding are
-excluded).
+## How to read these numbers
 
-| Mode | recall@1 | recall@3 | recall@5 | MRR | latency p50 | latency p95 |
-|---|---|---|---|---|---|---|
-| **hybrid** (dense + BM25 + RRF) | 42.9% | 82.1% | 85.7% | 0.639 | ~1.3 ms | ~1.7 ms |
-| **dense-only** (sqlite-vec) | 50.0% | 75.0% | 92.9% | 0.664 | ~0.45 ms | ~0.51 ms |
+- **Recall@k** is the fraction of questions where any expected path appears in the first *k* retrieved chunks. The harness ranks chunks, not unique files.
+- **MRR** is the mean reciprocal rank of the first matching chunk within the top 10. Rank 1 contributes 1; rank 2 contributes 0.5; a miss contributes 0.
+- **Search p50/p95** is the median and 95th-percentile time for `VectorStore.search()`. It excludes query embedding, model loading and index construction.
 
-(recall@k and MRR are deterministic and identical run-to-run; latency figures
-are representative of two runs on the same machine and vary by < 0.5 ms.)
+The gold-set labels are author judgements. Expected paths were checked to exist at the stated Moss commit; other files may also be valid answers. The evaluation does not measure generated-answer correctness, citation quality under model variation, or end-to-end latency.
 
-> **Re-verified 2026-06-30.** Re-ran `pnpm eval` on the current `moss` corpus,
-> which has since grown to **293 files / 1,523 chunks** (from 233 / 1,459). Every
-> `recall@k` figure was **identical**; hybrid `MRR` measured `0.639` (the original 233-file run measured `0.633`).
-> The benchmark is stable as the corpus grows — a good robustness signal.
+## Earlier run
 
-A/B is fair: the index is built once and both modes query the same store. The
-only difference is the dense-only path skips the BM25 leg via the optional
-`VectorStore.search(..., { mode: "dense" })` hook added for this eval — the
-default production code path (hybrid) is unchanged.
-
-## Verdict (honest, 3 lines)
-
-- On this 28-query / 293-file TypeScript corpus, **hybrid does not clearly beat dense-only**: dense wins on recall@1 (50% vs 43%), recall@5 (93% vs 86%) and MRR (0.664 vs 0.639), while hybrid only wins at recall@3 (82% vs 75%). The BM25 leg's OR-of-terms matching appears to inject some lexical noise that RRF can promote, slightly hurting top-1/top-5 precision here.
-- Retrieval quality is **good enough to claim for top-k (k≈3–5) developer-question retrieval** — a relevant file lands in the top 5 for 86–93% of realistic questions — but **not** as a precise top-1 answer engine (~43–50% recall@1). It is a strong retrieval stage to feed an LLM, not a standalone "jump to the one file" tool.
-- Both modes are effectively instant (sub-2 ms retrieval), so the dense-vs-hybrid choice is purely a quality trade-off, not a latency one.
-
-## Limitations
-
-- Single corpus (moss, ~1.5k chunks, all TypeScript) — results will not generalise to large polyglot repos; BM25's value typically grows with corpus size and with exact-identifier queries, so this small-corpus result likely understates hybrid's general benefit.
-- Gold labels are author-judged single-/few-file targets; "relevant" = an expected path substring appears in a retrieved chunk's file path. Other files may also be reasonable answers, so absolute recall is a lower bound.
-- Queries are natural-language developer questions, which favour dense semantic matching; an exact-symbol / API-name query mix would likely favour BM25/hybrid more.
-- Latency excludes query embedding (~tens of ms with all-MiniLM-L6-v2) and the one-time index build (~36 s); end-to-end per-query latency is dominated by embedding, not retrieval.
-- 28 queries is a small sample — treat single-digit-percentage differences as noise, not signal.
+The 29 June 2026 run used an earlier Moss checkout with 233 files and 1,459 chunks. It reported hybrid recall@1/3/5 of 42.9%/82.1%/85.7% and MRR 0.639; dense-only reported 50.0%/75.0%/92.9% and MRR 0.664. A 30 June re-run indexed 293 files and 1,523 chunks. These are historical results from a different corpus state and should not be compared as a controlled before-and-after change.
 
 ## Reproduce
 
-```bash
-# offline; embedding model must already be cached under node_modules/@xenova
-pnpm eval                       # indexes moss, prints both hybrid and dense tables
-EVAL_MODE=dense pnpm eval       # dense-only
-EVAL_MODE=hybrid pnpm eval      # hybrid-only
-pnpm eval <repoPath> <goldsetPath>   # any repo + gold set
+From the Quarry repository root:
+
+```sh
+pnpm eval ../moss eval/moss-goldset.json
+```
+
+The command indexes the current `../moss` checkout and prints both modes. To restrict the run:
+
+```sh
+EVAL_MODE=dense pnpm eval ../moss eval/moss-goldset.json
+EVAL_MODE=hybrid pnpm eval ../moss eval/moss-goldset.json
 ```

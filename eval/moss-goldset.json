@@ -1,0 +1,124 @@
+{
+  "corpus": "moss@731ab74",
+  "description": "28 developer questions mapped to source files in the moss repository at commit 731ab74 (2026-11-01). Expected paths were checked against that source tree. This evaluates retrieval against one current corpus; it is not representative of other repositories.",
+  "queries": [
+    {
+      "query": "How does Moss decide which provider to dispatch a task to and what the fallback order is?",
+      "expectedFiles": ["src/lib/providers/router.ts"]
+    },
+    {
+      "query": "Where is the fixed provider lane order defined as the single source of truth?",
+      "expectedFiles": [
+        "src/lib/providers/index.ts",
+        "src/lib/providers/types.ts"
+      ]
+    },
+    {
+      "query": "What happens when no provider is available to run a task? Which error is raised?",
+      "expectedFiles": ["src/lib/providers/router.ts"]
+    },
+    {
+      "query": "How does Moss talk to a local Ollama model to generate text?",
+      "expectedFiles": ["src/lib/providers/ollama.ts"]
+    },
+    {
+      "query": "How does Moss detect whether the codex or copilot CLI binary is installed on PATH?",
+      "expectedFiles": [
+        "src/lib/providers/detection.ts",
+        "src/lib/providers/detection.ts"
+      ]
+    },
+    {
+      "query": "Where are outbound HTTP network calls restricted to localhost endpoints?",
+      "expectedFiles": ["src/lib/net.ts"]
+    },
+    {
+      "query": "Which subprocess commands is Moss allowed to run, and where is the allowlist?",
+      "expectedFiles": ["src/lib/exec.ts"]
+    },
+    {
+      "query": "How does Moss run an external command safely and capture stdout and stderr?",
+      "expectedFiles": ["src/lib/exec.ts"]
+    },
+    {
+      "query": "How are capabilities gated by milestone so features cannot be used before they ship?",
+      "expectedFiles": ["src/lib/policy.ts"]
+    },
+    {
+      "query": "What error is thrown when a capability is used before its scheduled milestone?",
+      "expectedFiles": ["src/lib/policy.ts"]
+    },
+    {
+      "query": "How does Moss load a skill by id from the skills directory on disk?",
+      "expectedFiles": ["src/lib/skills/loader.ts"]
+    },
+    {
+      "query": "How is a skill's YAML frontmatter split, parsed and validated?",
+      "expectedFiles": ["src/lib/skills/parser.ts", "src/lib/skills/schema.ts"]
+    },
+    {
+      "query": "How does Moss execute a skill against a room and route the generation?",
+      "expectedFiles": ["src/lib/skills/runner.ts"]
+    },
+    {
+      "query": "How does Moss persist a new memory entry to disk?",
+      "expectedFiles": ["src/lib/memory/store.ts"]
+    },
+    {
+      "query": "How do I search or recall saved memory entries by query or tag?",
+      "expectedFiles": ["src/lib/memory/recall.ts"]
+    },
+    {
+      "query": "How are memory entries compacted into a single summary file?",
+      "expectedFiles": ["src/lib/memory/compact.ts"]
+    },
+    {
+      "query": "How does Moss verify an MCP tool is allowlisted before calling it?",
+      "expectedFiles": ["src/lib/mcp/allowlist.ts"]
+    },
+    {
+      "query": "How does Moss connect to a locally-run MCP server over HTTP JSON-RPC?",
+      "expectedFiles": ["src/lib/mcp/client.ts"]
+    },
+    {
+      "query": "How is the LiteLLM endpoint config loaded and validated as localhost-only?",
+      "expectedFiles": ["src/lib/litellm/config.ts"]
+    },
+    {
+      "query": "How does Moss produce a git diff of a target repo for review?",
+      "expectedFiles": ["src/lib/git.ts"]
+    },
+    {
+      "query": "How does Moss detect that the target git repository was mutated during a run?",
+      "expectedFiles": ["src/lib/git.ts"]
+    },
+    {
+      "query": "Where are all the moss CLI subcommands registered with commander?",
+      "expectedFiles": ["src/cli.ts"]
+    },
+    {
+      "query": "What environment and tooling does the doctor command check?",
+      "expectedFiles": ["src/commands/doctor.ts"]
+    },
+    {
+      "query": "How does the run command execute a skill against a repo and write a report?",
+      "expectedFiles": ["src/commands/run.ts"]
+    },
+    {
+      "query": "How does Moss pick the best model for a task kind such as code-review?",
+      "expectedFiles": ["src/lib/route.ts", "src/lib/registry.ts"]
+    },
+    {
+      "query": "How does Moss make sure resolved file paths stay inside the project root?",
+      "expectedFiles": ["src/lib/paths.ts"]
+    },
+    {
+      "query": "How does Moss classify a document by extension and decide if it is convertible?",
+      "expectedFiles": ["src/lib/docs/classify.ts", "src/lib/docs/convert.ts"]
+    },
+    {
+      "query": "How are eval responses scored deterministically across dimensions?",
+      "expectedFiles": ["src/lib/evals/scoring.ts"]
+    }
+  ]
+}
