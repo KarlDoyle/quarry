@@ -68,3 +68,28 @@ jobs:
           cd "$RUNNER_TEMP/quarry-consumer"
           NODE_OPTIONS=--experimental-sqlite node --input-type=module -e 'const q = await import("@mrkarldoyle/quarry"); if (!q.RepositoryIndexer || !q.VectorStore) process.exit(1);'
           ./node_modules/.bin/quarry --help
+
+  docker:
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Test on Node 26 inside Docker
+        run: docker build --target test --tag quarry-test .
+
+      - name: Build production image
+        run: docker build --tag quarry-ci .
+
+      - name: Verify container CLI, indexing, and search
+        run: |
+          docker run --rm --entrypoint sh quarry-ci -ec '
+            export QUARRY_DATA_DIR=/tmp/quarry-smoke
+            node --experimental-sqlite dist/cli.js --help
+            node --experimental-sqlite dist/cli.js index examples/sample-repo
+            node --experimental-sqlite dist/cli.js search "cart total" > /tmp/quarry-search.txt
+            cat /tmp/quarry-search.txt
+            grep -F "cart.js" /tmp/quarry-search.txt
+            node --experimental-sqlite dist/cli.js stats
+          '
